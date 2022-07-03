@@ -1,0 +1,11 @@
+print "Hello world" // endline comment
+
+var a = 10
+var b = a / 5
+
+//conditions
+if a == 2 {
+    print true
+} else {
+    print false
+}

@@ -1,9 +1,12 @@
 package interpreter
 
 import (
+	"bufio"
 	"fmt"
+	"github.com/paw1a/golox/internal/lexing"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 var HasError = false
@@ -28,13 +31,13 @@ func runFile(filename string) {
 		return
 	}
 
-	textBytes, err := ioutil.ReadAll(file)
+	sourceBytes, err := ioutil.ReadAll(file)
 	if err != nil {
 		fmt.Printf("can't read file %s: %v", filename, err)
 		return
 	}
 
-	run(string(textBytes))
+	run(string(sourceBytes))
 
 	if HasError {
 		os.Exit(65)
@@ -42,12 +45,13 @@ func runFile(filename string) {
 }
 
 func runPrompt() {
+	in := bufio.NewReader(os.Stdin)
+
 	for {
 		fmt.Printf("golox >>> ")
 
-		var line string
-		_, err := fmt.Scanln(&line)
-		if err != nil {
+		line, err := in.ReadString('\n')
+		if err != nil || strings.TrimSpace(line) == "exit" {
 			break
 		}
 
@@ -56,6 +60,11 @@ func runPrompt() {
 	}
 }
 
-func run(sourceCode string) {
+func run(source string) {
+	lexer := lexing.NewLexer(source)
+	tokens := lexer.ScanTokens()
 
+	for token := range tokens {
+		fmt.Printf("%v", token)
+	}
 }
