@@ -1,16 +1,19 @@
 package lexing
 
 import (
+	"fmt"
 	"strconv"
 )
 
 type Lexer struct {
-	tokens []Token
+	Tokens []Token
 	source string
 
 	start   int
 	current int
 	line    int
+
+	Errors []error
 }
 
 func (l *Lexer) ScanTokens() []Token {
@@ -19,9 +22,9 @@ func (l *Lexer) ScanTokens() []Token {
 		l.ScanToken()
 	}
 
-	l.tokens = append(l.tokens, NewToken(Eof, "", nil, l.line))
+	l.Tokens = append(l.Tokens, NewToken(Eof, "", nil, l.line))
 
-	return l.tokens
+	return l.Tokens
 }
 
 func (l *Lexer) ScanToken() {
@@ -72,26 +75,29 @@ func (l *Lexer) ScanToken() {
 			l.addToken(Equal)
 		}
 	case '/':
-		if l.advance() == '/' {
+		if l.peek() == '/' {
+			l.advance()
 			for !l.isEOF() && l.peek() != '\n' {
 				l.advance()
 			}
+		} else if l.peek() == '*' {
+			l.advance()
+			l.blockComment()
 		} else {
 			l.addToken(Slash)
 		}
 	case '"':
 		l.string()
-	case ' ', '\t', '\r':
-		fallthrough
 	case '\n':
 		l.line++
+	case ' ', '\t', '\r':
 	default:
 		if l.isDigit(c) {
 			l.number()
 		} else if l.isAlpha(c) {
 			l.identifier()
 		} else {
-			// Print the error unexpected token
+			l.error("unexpected token")
 		}
 	}
 }
@@ -105,7 +111,7 @@ func (l *Lexer) string() {
 	}
 
 	if l.isEOF() {
-		// Print error
+		l.error("no closing \" quote")
 		return
 	}
 
@@ -134,6 +140,40 @@ func (l *Lexer) number() {
 
 	numberValue, _ := strconv.ParseFloat(l.source[l.start:l.current], 64)
 	l.addTokenWithLiteral(Number, numberValue)
+}
+
+func (l *Lexer) blockComment() {
+	for {
+		if l.peek() == '*' {
+			l.advance()
+			if l.peek() == '/' {
+				l.advance()
+				if l.peek() == '\n' {
+					l.line++
+					l.advance()
+				}
+				return
+			}
+		}
+
+		if l.peek() == '/' {
+			l.advance()
+			if l.peek() == '*' {
+				l.advance()
+				l.blockComment()
+			}
+		}
+
+		if l.peek() == '\n' {
+			l.line++
+		}
+
+		if l.isEOF() {
+			l.error("unterminated block comment")
+			return
+		}
+		l.advance()
+	}
 }
 
 var keywords = map[string]TokenType{
@@ -175,7 +215,12 @@ func (l *Lexer) addToken(tokenType TokenType) {
 
 func (l *Lexer) addTokenWithLiteral(tokenType TokenType, literal interface{}) {
 	lexeme := l.source[l.start:l.current]
-	l.tokens = append(l.tokens, NewToken(tokenType, lexeme, literal, l.line))
+	l.Tokens = append(l.Tokens, NewToken(tokenType, lexeme, literal, l.line))
+}
+
+func (l *Lexer) error(message string) {
+	err := fmt.Errorf("line %d | error: %s", l.line, message)
+	l.Errors = append(l.Errors, err)
 }
 
 func NewLexer(source string) *Lexer {

@@ -1,11 +1,24 @@
-print "Hello world" // endline comment
+print "Hello world"; //endline comment
 
-var a = 10
-var b = a / 5
+var a = 10;
+var b = a / 5;
 
-//conditions
+/*
+Hello comment
+*/
+
+/*
+    Outside inner comment
+    /*
+        * Inside inner comment *
+        * /
+    */
+    After inner comment
+*/
+
+//condition
 if a == 2 {
-    print true
+    print true;
 } else {
-    print false
+    print false;
 }

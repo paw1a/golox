@@ -62,9 +62,21 @@ func runPrompt() {
 
 func run(source string) {
 	lexer := lexing.NewLexer(source)
-	tokens := lexer.ScanTokens()
+	lexer.ScanTokens()
 
-	for token := range tokens {
-		fmt.Printf("%v", token)
+	if len(lexer.Errors) == 0 {
+		for _, token := range lexer.Tokens {
+			fmt.Printf("%v\n", token.String())
+		}
+	} else {
+		for _, err := range lexer.Errors {
+			fmt.Printf("%s\n", err.Error())
+		}
+		HasError = true
 	}
+}
+
+func PrintError(line int, message string) {
+	fmt.Printf("line %d | error: %s", line, message)
+	HasError = true
 }

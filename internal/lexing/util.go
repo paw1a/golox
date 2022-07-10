@@ -1,19 +1,33 @@
 package lexing
 
-import "unicode"
+import (
+	"unicode"
+)
 
 func (l *Lexer) advance() uint8 {
-	c := l.source[l.current]
-	l.current++
-	return c
+	if l.isEOF() {
+		return 0
+	} else {
+		c := l.source[l.current]
+		l.current++
+		return c
+	}
 }
 
 func (l *Lexer) peek() uint8 {
-	return l.source[l.current]
+	if l.isEOF() {
+		return 0
+	} else {
+		return l.source[l.current]
+	}
 }
 
 func (l *Lexer) peekNext() uint8 {
-	return l.source[l.current+1]
+	if l.current+1 >= len(l.source) {
+		return 0
+	} else {
+		return l.source[l.current+1]
+	}
 }
 
 func (l *Lexer) isDigit(c uint8) bool {
