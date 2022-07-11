@@ -52,22 +52,22 @@ const (
 )
 
 type Token struct {
-	tokenType TokenType
-	lexeme    string
-	literal   interface{}
-	line      int
+	TokenType TokenType
+	Lexeme    string
+	Literal   interface{}
+	Line      int
 }
 
 func (t *Token) String() string {
-	return fmt.Sprintf("token %v, lexeme = %s, literal = %v, line = %d",
-		t.tokenType, t.lexeme, t.literal, t.line)
+	return fmt.Sprintf("token %v, Lexeme = %s, Literal = %v, Line = %d",
+		t.TokenType, t.Lexeme, t.Literal, t.Line)
 }
 
 func NewToken(tokenType TokenType, lexeme string, literal interface{}, line int) Token {
 	return Token{
-		tokenType: tokenType,
-		lexeme:    lexeme,
-		literal:   literal,
-		line:      line,
+		TokenType: tokenType,
+		Lexeme:    lexeme,
+		Literal:   literal,
+		Line:      line,
 	}
 }

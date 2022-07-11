@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/paw1a/golox/internal/lexing"
+	"github.com/paw1a/golox/internal/parsing"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -65,9 +66,12 @@ func run(source string) {
 	lexer.ScanTokens()
 
 	if len(lexer.Errors) == 0 {
-		for _, token := range lexer.Tokens {
-			fmt.Printf("%v\n", token.String())
-		}
+		//for _, token := range lexer.Tokens {
+		//	fmt.Printf("%s\n", token.String())
+		//}
+		parser := parsing.NewParser(lexer.Tokens)
+		astNode := parser.Parse()
+		fmt.Printf("%v\n", astNode)
 	} else {
 		for _, err := range lexer.Errors {
 			fmt.Printf("%s\n", err.Error())
