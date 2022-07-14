@@ -122,7 +122,7 @@ func (p *Parser) primary() Expr {
 		p.require(lexing.RightParen, "expect ')' token after expression")
 		return GroupingExpr{Expr: expr}
 	default:
-		p.error(p.peek(), "expect expression")
+		runtimeError(p.peek(), "expect expression")
 		return nil
 	}
 }
@@ -131,38 +131,11 @@ func (p *Parser) require(tokenType lexing.TokenType, message string) {
 	if p.match(tokenType) {
 		p.advance()
 	} else {
-		p.error(p.peek(), message)
+		runtimeError(p.peek(), message)
 	}
 }
 
-func (p *Parser) match(tokenTypes ...lexing.TokenType) bool {
-	for _, tokenType := range tokenTypes {
-		if p.peek().TokenType == tokenType {
-			return true
-		}
-	}
-	return false
-}
-
-func (p *Parser) advance() lexing.Token {
-	if !p.isEof() {
-		token := p.tokens[p.current]
-		p.current++
-		return token
-	}
-
-	return p.tokens[p.current]
-}
-
-func (p *Parser) peek() lexing.Token {
-	return p.tokens[p.current]
-}
-
-func (p *Parser) isEof() bool {
-	return p.peek().TokenType == lexing.Eof
-}
-
-func (p *Parser) error(token lexing.Token, message string) {
+func runtimeError(token lexing.Token, message string) {
 	var errorMessage string
 	if token.TokenType == lexing.Eof {
 		errorMessage = fmt.Sprintf("line %d | at end of input: %s", token.Line, message)
