@@ -70,8 +70,8 @@ func run(source string) {
 		//	fmt.Printf("%s\n", token.String())
 		//}
 		parser := parsing.NewParser(lexer.Tokens)
-		astNode := parser.Parse()
-		fmt.Printf("%v\n", astNode)
+		expr := parser.Parse()
+		fmt.Printf("%s\n", expr.Print())
 	} else {
 		for _, err := range lexer.Errors {
 			fmt.Printf("%s\n", err.Error())

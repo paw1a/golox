@@ -1,24 +1,45 @@
 package parsing
 
-import "github.com/paw1a/golox/internal/lexing"
+import (
+	"github.com/paw1a/golox/internal/lexing"
+)
 
-type AstNode interface{}
-
-type BinaryAstNode struct {
-	LeftExpr  AstNode
-	Operator  lexing.Token
-	RightExpr AstNode
+type Expr interface {
+	Evaluate() interface{}
+	Printer
 }
 
-type UnaryAstNode struct {
+type BinaryExpr struct {
+	LeftExpr  Expr
 	Operator  lexing.Token
-	RightExpr AstNode
+	RightExpr Expr
 }
 
-type LiteralAstNode struct {
+func (node BinaryExpr) Evaluate() interface{} {
+	return nil
+}
+
+type UnaryExpr struct {
+	Operator  lexing.Token
+	RightExpr Expr
+}
+
+func (node UnaryExpr) Evaluate() interface{} {
+	return nil
+}
+
+type LiteralExpr struct {
 	LiteralValue interface{}
 }
 
-type GroupingAstNode struct {
-	Expr AstNode
+func (node LiteralExpr) Evaluate() interface{} {
+	return nil
+}
+
+type GroupingExpr struct {
+	Expr Expr
+}
+
+func (node GroupingExpr) Evaluate() interface{} {
+	return nil
 }

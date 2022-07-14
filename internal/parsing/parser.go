@@ -12,22 +12,22 @@ type Parser struct {
 	Errors []error
 }
 
-func (p *Parser) Parse() AstNode {
+func (p *Parser) Parse() Expr {
 	return p.expression()
 }
 
-func (p *Parser) expression() AstNode {
+func (p *Parser) expression() Expr {
 	return p.equality()
 }
 
-func (p *Parser) equality() AstNode {
-	var expr AstNode
+func (p *Parser) equality() Expr {
+	var expr Expr
 
 	expr = p.comparison()
 	for p.match(lexing.BangEqual, lexing.EqualEqual) {
 		operator := p.advance()
 		rightExpr := p.comparison()
-		expr = BinaryAstNode{
+		expr = BinaryExpr{
 			LeftExpr:  expr,
 			Operator:  operator,
 			RightExpr: rightExpr,
@@ -37,14 +37,14 @@ func (p *Parser) equality() AstNode {
 	return expr
 }
 
-func (p *Parser) comparison() AstNode {
-	var expr AstNode
+func (p *Parser) comparison() Expr {
+	var expr Expr
 
 	expr = p.term()
 	for p.match(lexing.Less, lexing.LessEqual, lexing.Greater, lexing.GreaterEqual) {
 		operator := p.advance()
 		rightExpr := p.term()
-		expr = BinaryAstNode{
+		expr = BinaryExpr{
 			LeftExpr:  expr,
 			Operator:  operator,
 			RightExpr: rightExpr,
@@ -54,14 +54,14 @@ func (p *Parser) comparison() AstNode {
 	return expr
 }
 
-func (p *Parser) term() AstNode {
-	var expr AstNode
+func (p *Parser) term() Expr {
+	var expr Expr
 
 	expr = p.factor()
 	for p.match(lexing.Minus, lexing.Plus) {
 		operator := p.advance()
 		rightExpr := p.factor()
-		expr = BinaryAstNode{
+		expr = BinaryExpr{
 			LeftExpr:  expr,
 			Operator:  operator,
 			RightExpr: rightExpr,
@@ -71,14 +71,14 @@ func (p *Parser) term() AstNode {
 	return expr
 }
 
-func (p *Parser) factor() AstNode {
-	var expr AstNode
+func (p *Parser) factor() Expr {
+	var expr Expr
 
 	expr = p.unary()
 	for p.match(lexing.Star, lexing.Slash) {
 		operator := p.advance()
 		rightExpr := p.unary()
-		expr = BinaryAstNode{
+		expr = BinaryExpr{
 			LeftExpr:  expr,
 			Operator:  operator,
 			RightExpr: rightExpr,
@@ -88,11 +88,11 @@ func (p *Parser) factor() AstNode {
 	return expr
 }
 
-func (p *Parser) unary() AstNode {
+func (p *Parser) unary() Expr {
 	for p.match(lexing.Bang, lexing.Minus) {
 		operator := p.advance()
 		rightExpr := p.unary()
-		return UnaryAstNode{
+		return UnaryExpr{
 			Operator:  operator,
 			RightExpr: rightExpr,
 		}
@@ -101,26 +101,26 @@ func (p *Parser) unary() AstNode {
 	return p.primary()
 }
 
-func (p *Parser) primary() AstNode {
+func (p *Parser) primary() Expr {
 	switch {
 	case p.match(lexing.False):
 		p.advance()
-		return LiteralAstNode{LiteralValue: false}
+		return LiteralExpr{LiteralValue: false}
 	case p.match(lexing.True):
 		p.advance()
-		return LiteralAstNode{LiteralValue: true}
+		return LiteralExpr{LiteralValue: true}
 	case p.match(lexing.Nil):
 		p.advance()
-		return LiteralAstNode{LiteralValue: nil}
+		return LiteralExpr{LiteralValue: nil}
 	case p.match(lexing.Number, lexing.String):
-		astNode := LiteralAstNode{LiteralValue: p.peek().Literal}
+		astNode := LiteralExpr{LiteralValue: p.peek().Literal}
 		p.advance()
 		return astNode
 	case p.match(lexing.LeftParen):
 		p.advance()
 		expr := p.expression()
 		p.require(lexing.RightParen, "no right paren")
-		return GroupingAstNode{Expr: expr}
+		return GroupingExpr{Expr: expr}
 	default:
 		p.error(p.peek(), "no primary tokens")
 		return nil
