@@ -9,39 +9,39 @@ type Printer interface {
 	Print() string
 }
 
-func (node BinaryExpr) Print() string {
+func (expr BinaryExpr) Print() string {
 	var buffer bytes.Buffer
 
 	buffer.WriteString(" (")
-	buffer.WriteString(node.Operator.Lexeme)
-	buffer.WriteString(node.LeftExpr.Print())
-	buffer.WriteString(node.RightExpr.Print())
+	buffer.WriteString(expr.Operator.Lexeme)
+	buffer.WriteString(expr.LeftExpr.Print())
+	buffer.WriteString(expr.RightExpr.Print())
 	buffer.WriteString(") ")
 
 	return buffer.String()
 }
 
-func (node UnaryExpr) Print() string {
+func (expr UnaryExpr) Print() string {
 	var buffer bytes.Buffer
 
 	buffer.WriteString(" (")
-	buffer.WriteString(node.Operator.Lexeme)
-	buffer.WriteString(node.RightExpr.Print())
+	buffer.WriteString(expr.Operator.Lexeme)
+	buffer.WriteString(expr.RightExpr.Print())
 	buffer.WriteString(") ")
 
 	return buffer.String()
 }
 
-func (node LiteralExpr) Print() string {
-	return fmt.Sprintf(" %v ", node.LiteralValue)
+func (expr LiteralExpr) Print() string {
+	return fmt.Sprintf(" %v ", expr.LiteralValue)
 }
 
-func (node GroupingExpr) Print() string {
+func (expr GroupingExpr) Print() string {
 	var buffer bytes.Buffer
 
 	buffer.WriteString(" (")
 	buffer.WriteString("group ")
-	buffer.WriteString(node.Expr.Print())
+	buffer.WriteString(expr.Expr.Print())
 	buffer.WriteString(") ")
 
 	return buffer.String()

@@ -12,8 +12,35 @@ type Parser struct {
 	Errors []error
 }
 
-func (p *Parser) Parse() Expr {
-	return p.expression()
+func (p *Parser) Parse() []Stmt {
+	statements := make([]Stmt, 0)
+
+	for !p.isEof() {
+		statements = append(statements, p.statement())
+	}
+
+	return statements
+}
+
+func (p *Parser) statement() Stmt {
+	if p.match(lexing.Print) {
+		p.advance()
+		return p.printStatement()
+	}
+
+	return p.expressionStatement()
+}
+
+func (p *Parser) printStatement() Stmt {
+	expr := p.expression()
+	p.require(lexing.Semicolon, "';' expected")
+	return PrintStmt{Expr: expr}
+}
+
+func (p *Parser) expressionStatement() Stmt {
+	expr := p.expression()
+	p.require(lexing.Semicolon, "';' expected")
+	return ExpressionStmt{Expr: expr}
 }
 
 func (p *Parser) expression() Expr {

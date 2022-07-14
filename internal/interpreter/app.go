@@ -67,9 +67,10 @@ func run(source string) {
 
 	if len(lexer.Errors) == 0 {
 		parser := parsing.NewParser(lexer.Tokens)
-		expr := parser.Parse()
-		value := expr.Evaluate()
-		fmt.Printf("%v\n", value)
+		statements := parser.Parse()
+		for _, stmt := range statements {
+			stmt.Execute()
+		}
 	} else {
 		for _, err := range lexer.Errors {
 			fmt.Printf("%s\n", err.Error())

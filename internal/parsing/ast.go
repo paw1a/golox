@@ -1,6 +1,7 @@
 package parsing
 
 import (
+	"fmt"
 	"github.com/paw1a/golox/internal/lexing"
 )
 
@@ -15,11 +16,11 @@ type BinaryExpr struct {
 	RightExpr Expr
 }
 
-func (node BinaryExpr) Evaluate() interface{} {
-	leftValue := node.LeftExpr.Evaluate()
-	rightValue := node.RightExpr.Evaluate()
+func (expr BinaryExpr) Evaluate() interface{} {
+	leftValue := expr.LeftExpr.Evaluate()
+	rightValue := expr.RightExpr.Evaluate()
 
-	switch node.Operator.TokenType {
+	switch expr.Operator.TokenType {
 	case lexing.Plus:
 		switch {
 		case isNumber(leftValue) && isNumber(rightValue):
@@ -27,22 +28,22 @@ func (node BinaryExpr) Evaluate() interface{} {
 		case isString(leftValue) && isString(rightValue):
 			return leftValue.(string) + rightValue.(string)
 		default:
-			runtimeError(node.Operator, "number or string operands expected")
+			runtimeError(expr.Operator, "number or string operands expected")
 		}
 	case lexing.Minus:
-		requireNumberOperand(node.Operator, leftValue)
-		requireNumberOperand(node.Operator, rightValue)
+		requireNumberOperand(expr.Operator, leftValue)
+		requireNumberOperand(expr.Operator, rightValue)
 		return leftValue.(float64) - rightValue.(float64)
 	case lexing.Star:
-		requireNumberOperand(node.Operator, leftValue)
-		requireNumberOperand(node.Operator, rightValue)
+		requireNumberOperand(expr.Operator, leftValue)
+		requireNumberOperand(expr.Operator, rightValue)
 		return leftValue.(float64) * rightValue.(float64)
 	case lexing.Slash:
-		requireNumberOperand(node.Operator, leftValue)
-		requireNumberOperand(node.Operator, rightValue)
+		requireNumberOperand(expr.Operator, leftValue)
+		requireNumberOperand(expr.Operator, rightValue)
 
 		if rightValue.(float64) == 0 {
-			runtimeError(node.Operator, "zero division")
+			runtimeError(expr.Operator, "zero division")
 		}
 
 		return leftValue.(float64) / rightValue.(float64)
@@ -53,7 +54,7 @@ func (node BinaryExpr) Evaluate() interface{} {
 		case isString(leftValue) && isString(rightValue):
 			return leftValue.(string) < rightValue.(string)
 		default:
-			runtimeError(node.Operator, "number or string operands expected")
+			runtimeError(expr.Operator, "number or string operands expected")
 		}
 	case lexing.Greater:
 		switch {
@@ -62,7 +63,7 @@ func (node BinaryExpr) Evaluate() interface{} {
 		case isString(leftValue) && isString(rightValue):
 			return leftValue.(string) > rightValue.(string)
 		default:
-			runtimeError(node.Operator, "number or string operands expected")
+			runtimeError(expr.Operator, "number or string operands expected")
 		}
 	case lexing.LessEqual:
 		switch {
@@ -71,7 +72,7 @@ func (node BinaryExpr) Evaluate() interface{} {
 		case isString(leftValue) && isString(rightValue):
 			return leftValue.(string) <= rightValue.(string)
 		default:
-			runtimeError(node.Operator, "number or string operands expected")
+			runtimeError(expr.Operator, "number or string operands expected")
 		}
 	case lexing.GreaterEqual:
 		switch {
@@ -80,7 +81,7 @@ func (node BinaryExpr) Evaluate() interface{} {
 		case isString(leftValue) && isString(rightValue):
 			return leftValue.(string) >= rightValue.(string)
 		default:
-			runtimeError(node.Operator, "number or string operands expected")
+			runtimeError(expr.Operator, "number or string operands expected")
 		}
 	case lexing.EqualEqual:
 		switch {
@@ -93,7 +94,7 @@ func (node BinaryExpr) Evaluate() interface{} {
 		case isString(leftValue) && isString(rightValue):
 			return leftValue.(string) == rightValue.(string)
 		default:
-			runtimeError(node.Operator, "number, string or nil operands expected")
+			runtimeError(expr.Operator, "number, string or nil operands expected")
 		}
 	case lexing.BangEqual:
 		switch {
@@ -106,7 +107,7 @@ func (node BinaryExpr) Evaluate() interface{} {
 		case isString(leftValue) && isString(rightValue):
 			return leftValue.(string) != rightValue.(string)
 		default:
-			runtimeError(node.Operator, "number, string or nil operands expected")
+			runtimeError(expr.Operator, "number, string or nil operands expected")
 		}
 	}
 
@@ -118,10 +119,10 @@ type UnaryExpr struct {
 	RightExpr Expr
 }
 
-func (node UnaryExpr) Evaluate() interface{} {
-	value := node.RightExpr.Evaluate()
+func (expr UnaryExpr) Evaluate() interface{} {
+	value := expr.RightExpr.Evaluate()
 
-	switch node.Operator.TokenType {
+	switch expr.Operator.TokenType {
 	case lexing.Minus:
 		return -value.(float64)
 	case lexing.Bang:
@@ -135,16 +136,37 @@ type LiteralExpr struct {
 	LiteralValue interface{}
 }
 
-func (node LiteralExpr) Evaluate() interface{} {
-	return node.LiteralValue
+func (expr LiteralExpr) Evaluate() interface{} {
+	return expr.LiteralValue
 }
 
 type GroupingExpr struct {
 	Expr Expr
 }
 
-func (node GroupingExpr) Evaluate() interface{} {
-	return node.Expr.Evaluate()
+func (expr GroupingExpr) Evaluate() interface{} {
+	return expr.Expr.Evaluate()
+}
+
+type Stmt interface {
+	Execute()
+}
+
+type ExpressionStmt struct {
+	Expr Expr
+}
+
+func (stmt ExpressionStmt) Execute() {
+	stmt.Expr.Evaluate()
+}
+
+type PrintStmt struct {
+	Expr Expr
+}
+
+func (stmt PrintStmt) Execute() {
+	value := stmt.Expr.Evaluate()
+	fmt.Printf("%v\n", value)
 }
 
 func requireNumberOperand(operator lexing.Token, operand interface{}) {
