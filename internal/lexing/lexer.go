@@ -51,25 +51,29 @@ func (l *Lexer) ScanToken() {
 	case '*':
 		l.addToken(Star)
 	case '!':
-		if l.advance() == '=' {
+		if l.peek() == '=' {
+			l.advance()
 			l.addToken(BangEqual)
 		} else {
 			l.addToken(Bang)
 		}
 	case '<':
-		if l.advance() == '=' {
+		if l.peek() == '=' {
+			l.advance()
 			l.addToken(LessEqual)
 		} else {
 			l.addToken(Less)
 		}
 	case '>':
-		if l.advance() == '=' {
+		if l.peek() == '=' {
+			l.advance()
 			l.addToken(GreaterEqual)
 		} else {
 			l.addToken(Greater)
 		}
 	case '=':
-		if l.advance() == '=' {
+		if l.peek() == '=' {
+			l.advance()
 			l.addToken(EqualEqual)
 		} else {
 			l.addToken(Equal)
