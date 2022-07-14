@@ -66,21 +66,17 @@ func run(source string) {
 	lexer.ScanTokens()
 
 	if len(lexer.Errors) == 0 {
-		//for _, token := range lexer.Tokens {
-		//	fmt.Printf("%s\n", token.String())
-		//}
 		parser := parsing.NewParser(lexer.Tokens)
 		expr := parser.Parse()
-		fmt.Printf("%s\n", expr.Print())
+		if r := recover(); r != nil {
+			fmt.Println(r)
+		} else {
+			fmt.Printf("%s\n", expr.Print())
+		}
 	} else {
 		for _, err := range lexer.Errors {
 			fmt.Printf("%s\n", err.Error())
 		}
 		HasError = true
 	}
-}
-
-func PrintError(line int, message string) {
-	fmt.Printf("line %d | error: %s", line, message)
-	HasError = true
 }

@@ -119,20 +119,19 @@ func (p *Parser) primary() Expr {
 	case p.match(lexing.LeftParen):
 		p.advance()
 		expr := p.expression()
-		p.require(lexing.RightParen, "no right paren")
+		p.require(lexing.RightParen, "expect ')' token after expression")
 		return GroupingExpr{Expr: expr}
 	default:
-		p.error(p.peek(), "no primary tokens")
+		p.error(p.peek(), "expect expression")
 		return nil
 	}
 }
 
-func (p *Parser) require(tokenType lexing.TokenType, message string) error {
+func (p *Parser) require(tokenType lexing.TokenType, message string) {
 	if p.match(tokenType) {
 		p.advance()
-		return nil
 	} else {
-		return nil
+		p.error(p.peek(), message)
 	}
 }
 
@@ -164,8 +163,13 @@ func (p *Parser) isEof() bool {
 }
 
 func (p *Parser) error(token lexing.Token, message string) {
-	err := fmt.Errorf("line %d: '%s' | error: %s", token.Line, token.Lexeme, message)
-	p.Errors = append(p.Errors, err)
+	var errorMessage string
+	if token.TokenType == lexing.Eof {
+		errorMessage = fmt.Sprintf("line %d | at end of input: %s", token.Line, message)
+	} else {
+		errorMessage = fmt.Sprintf("line %d | at '%s': %s", token.Line, token.Lexeme, message)
+	}
+	panic(errorMessage)
 }
 
 func NewParser(tokens []lexing.Token) *Parser {
