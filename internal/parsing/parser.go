@@ -35,8 +35,7 @@ func (p *Parser) declaration() ast.Stmt {
 }
 
 func (p *Parser) varDeclaration() ast.Stmt {
-	p.requireToken(lexing.Identifier, "var identifier expected")
-	varName := p.advance()
+	varName := p.requireToken(lexing.Identifier, "variable name expected")
 
 	var initializer ast.Expr
 	if p.peek().TokenType == lexing.Equal {
@@ -46,8 +45,8 @@ func (p *Parser) varDeclaration() ast.Stmt {
 
 	p.requireToken(lexing.Semicolon, "';' expected")
 	return ast.VarDeclarationStmt{
-		Name: varName,
-		Expr: initializer,
+		Name:        varName,
+		Initializer: initializer,
 	}
 }
 
@@ -73,7 +72,28 @@ func (p *Parser) expressionStatement() ast.Stmt {
 }
 
 func (p *Parser) expression() ast.Expr {
-	return p.equality()
+	return p.assignment()
+}
+
+func (p *Parser) assignment() ast.Expr {
+	expr := p.equality()
+
+	if p.match(lexing.Equal) {
+		equalToken := p.advance()
+		value := p.expression()
+
+		switch expr.(type) {
+		case ast.VariableExpr:
+			return ast.AssignExpr{
+				Name:        expr.(ast.VariableExpr).Name,
+				Initializer: value,
+			}
+		}
+
+		parseError(equalToken, "invalid assignment target")
+	}
+
+	return expr
 }
 
 func (p *Parser) equality() ast.Expr {
@@ -185,11 +205,12 @@ func (p *Parser) primary() ast.Expr {
 	}
 }
 
-func (p *Parser) requireToken(tokenType lexing.TokenType, message string) {
+func (p *Parser) requireToken(tokenType lexing.TokenType, message string) lexing.Token {
 	if p.match(tokenType) {
-		p.advance()
+		return p.advance()
 	} else {
 		parseError(p.peek(), message)
+		return lexing.Token{}
 	}
 }
 

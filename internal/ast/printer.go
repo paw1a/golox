@@ -51,6 +51,10 @@ func (expr VariableExpr) Print() string {
 	return ""
 }
 
+func (expr AssignExpr) Print() string {
+	return ""
+}
+
 func (stmt ExpressionStmt) Print() string {
 	return ""
 }

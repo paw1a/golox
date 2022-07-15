@@ -5,26 +5,30 @@ import (
 	"github.com/paw1a/golox/internal/lexing"
 )
 
-func Evaluate(expr ast.Expr) interface{} {
+func (i Interpreter) Evaluate(expr ast.Expr) interface{} {
 	switch expr.(type) {
 	case ast.BinaryExpr:
-		return evaluateBinaryExpr(expr.(ast.BinaryExpr))
+		return i.evaluateBinaryExpr(expr.(ast.BinaryExpr))
 	case ast.UnaryExpr:
-		return evaluateUnaryExpr(expr.(ast.UnaryExpr))
+		return i.evaluateUnaryExpr(expr.(ast.UnaryExpr))
 	case ast.LiteralExpr:
-		return evaluateLiteralExpr(expr.(ast.LiteralExpr))
+		return i.evaluateLiteralExpr(expr.(ast.LiteralExpr))
 	case ast.GroupingExpr:
-		return evaluateGroupingExpr(expr.(ast.GroupingExpr))
+		return i.evaluateGroupingExpr(expr.(ast.GroupingExpr))
 	case ast.VariableExpr:
-		return evaluateVariableExpr(expr.(ast.VariableExpr))
+		return i.evaluateVariableExpr(expr.(ast.VariableExpr))
+	case ast.AssignExpr:
+		return i.evaluateAssignExpr(expr.(ast.AssignExpr))
+	default:
+		runtimeError(lexing.Token{}, "invalid ast type")
 	}
 
 	return nil
 }
 
-func evaluateBinaryExpr(expr ast.BinaryExpr) interface{} {
-	leftValue := Evaluate(expr.LeftExpr)
-	rightValue := Evaluate(expr.RightExpr)
+func (i Interpreter) evaluateBinaryExpr(expr ast.BinaryExpr) interface{} {
+	leftValue := i.Evaluate(expr.LeftExpr)
+	rightValue := i.Evaluate(expr.RightExpr)
 
 	switch expr.Operator.TokenType {
 	case lexing.Plus:
@@ -120,8 +124,8 @@ func evaluateBinaryExpr(expr ast.BinaryExpr) interface{} {
 	return nil
 }
 
-func evaluateUnaryExpr(expr ast.UnaryExpr) interface{} {
-	value := Evaluate(expr.RightExpr)
+func (i Interpreter) evaluateUnaryExpr(expr ast.UnaryExpr) interface{} {
+	value := i.Evaluate(expr.RightExpr)
 
 	switch expr.Operator.TokenType {
 	case lexing.Minus:
@@ -133,16 +137,22 @@ func evaluateUnaryExpr(expr ast.UnaryExpr) interface{} {
 	return nil
 }
 
-func evaluateLiteralExpr(expr ast.LiteralExpr) interface{} {
+func (i Interpreter) evaluateLiteralExpr(expr ast.LiteralExpr) interface{} {
 	return expr.LiteralValue
 }
 
-func evaluateGroupingExpr(expr ast.GroupingExpr) interface{} {
-	return Evaluate(expr.Expr)
+func (i Interpreter) evaluateGroupingExpr(expr ast.GroupingExpr) interface{} {
+	return i.Evaluate(expr.Expr)
 }
 
-func evaluateVariableExpr(expr ast.VariableExpr) interface{} {
-	return nil
+func (i Interpreter) evaluateVariableExpr(expr ast.VariableExpr) interface{} {
+	return i.env.get(expr.Name)
+}
+
+func (i Interpreter) evaluateAssignExpr(expr ast.AssignExpr) interface{} {
+	value := i.Evaluate(expr.Initializer)
+	i.env.assign(expr.Name, value)
+	return value
 }
 
 func requireNumberOperand(operator lexing.Token, operand interface{}) {

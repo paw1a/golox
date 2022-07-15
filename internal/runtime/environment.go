@@ -6,15 +6,15 @@ import (
 )
 
 type Environment struct {
-	Objects map[string]interface{}
+	objects map[string]interface{}
 }
 
 func (e Environment) define(name string, value interface{}) {
-	e.Objects[name] = value
+	e.objects[name] = value
 }
 
 func (e Environment) get(name lexing.Token) interface{} {
-	value, ok := e.Objects[name.Lexeme]
+	value, ok := e.objects[name.Lexeme]
 	if ok {
 		return value
 	}
@@ -23,6 +23,15 @@ func (e Environment) get(name lexing.Token) interface{} {
 	return nil
 }
 
+func (e Environment) assign(name lexing.Token, value interface{}) {
+	if _, ok := e.objects[name.Lexeme]; ok {
+		e.objects[name.Lexeme] = value
+		return
+	}
+
+	runtimeError(name, fmt.Sprintf("undefined variable '%s'", name.Lexeme))
+}
+
 func NewEnvironment() *Environment {
-	return &Environment{Objects: make(map[string]interface{})}
+	return &Environment{objects: make(map[string]interface{})}
 }

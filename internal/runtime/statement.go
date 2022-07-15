@@ -17,14 +17,19 @@ func (i Interpreter) Execute(stmt ast.Stmt) {
 }
 
 func (i Interpreter) executeExprStmt(stmt ast.ExpressionStmt) {
-	Evaluate(stmt.Expr)
+	i.Evaluate(stmt.Expr)
 }
 
 func (i Interpreter) executePrintStmt(stmt ast.PrintStmt) {
-	value := Evaluate(stmt.Expr)
+	value := i.Evaluate(stmt.Expr)
 	fmt.Printf("%v\n", value)
 }
 
 func (i Interpreter) executeVarDeclarationStmt(stmt ast.VarDeclarationStmt) {
+	var value interface{}
+	if stmt.Initializer != nil {
+		value = i.Evaluate(stmt.Initializer)
+	}
 
+	i.env.define(stmt.Name.Lexeme, value)
 }

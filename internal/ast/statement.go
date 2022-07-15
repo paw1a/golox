@@ -17,6 +17,6 @@ type PrintStmt struct {
 }
 
 type VarDeclarationStmt struct {
-	Name lexing.Token
-	Expr Expr
+	Name        lexing.Token
+	Initializer Expr
 }

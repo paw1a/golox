@@ -28,3 +28,8 @@ type GroupingExpr struct {
 type VariableExpr struct {
 	Name lexing.Token
 }
+
+type AssignExpr struct {
+	Name        lexing.Token
+	Initializer Expr
+}
