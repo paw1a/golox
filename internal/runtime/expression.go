@@ -1,24 +1,30 @@
-package parsing
+package runtime
 
 import (
-	"fmt"
+	"github.com/paw1a/golox/internal/ast"
 	"github.com/paw1a/golox/internal/lexing"
 )
 
-type Expr interface {
-	Evaluate() interface{}
-	Printer
+func Evaluate(expr ast.Expr) interface{} {
+	switch expr.(type) {
+	case ast.BinaryExpr:
+		return evaluateBinaryExpr(expr.(ast.BinaryExpr))
+	case ast.UnaryExpr:
+		return evaluateUnaryExpr(expr.(ast.UnaryExpr))
+	case ast.LiteralExpr:
+		return evaluateLiteralExpr(expr.(ast.LiteralExpr))
+	case ast.GroupingExpr:
+		return evaluateGroupingExpr(expr.(ast.GroupingExpr))
+	case ast.VariableExpr:
+		return evaluateVariableExpr(expr.(ast.VariableExpr))
+	}
+
+	return nil
 }
 
-type BinaryExpr struct {
-	LeftExpr  Expr
-	Operator  lexing.Token
-	RightExpr Expr
-}
-
-func (expr BinaryExpr) Evaluate() interface{} {
-	leftValue := expr.LeftExpr.Evaluate()
-	rightValue := expr.RightExpr.Evaluate()
+func evaluateBinaryExpr(expr ast.BinaryExpr) interface{} {
+	leftValue := Evaluate(expr.LeftExpr)
+	rightValue := Evaluate(expr.RightExpr)
 
 	switch expr.Operator.TokenType {
 	case lexing.Plus:
@@ -114,13 +120,8 @@ func (expr BinaryExpr) Evaluate() interface{} {
 	return nil
 }
 
-type UnaryExpr struct {
-	Operator  lexing.Token
-	RightExpr Expr
-}
-
-func (expr UnaryExpr) Evaluate() interface{} {
-	value := expr.RightExpr.Evaluate()
+func evaluateUnaryExpr(expr ast.UnaryExpr) interface{} {
+	value := Evaluate(expr.RightExpr)
 
 	switch expr.Operator.TokenType {
 	case lexing.Minus:
@@ -132,41 +133,16 @@ func (expr UnaryExpr) Evaluate() interface{} {
 	return nil
 }
 
-type LiteralExpr struct {
-	LiteralValue interface{}
-}
-
-func (expr LiteralExpr) Evaluate() interface{} {
+func evaluateLiteralExpr(expr ast.LiteralExpr) interface{} {
 	return expr.LiteralValue
 }
 
-type GroupingExpr struct {
-	Expr Expr
+func evaluateGroupingExpr(expr ast.GroupingExpr) interface{} {
+	return Evaluate(expr.Expr)
 }
 
-func (expr GroupingExpr) Evaluate() interface{} {
-	return expr.Expr.Evaluate()
-}
-
-type Stmt interface {
-	Execute()
-}
-
-type ExpressionStmt struct {
-	Expr Expr
-}
-
-func (stmt ExpressionStmt) Execute() {
-	stmt.Expr.Evaluate()
-}
-
-type PrintStmt struct {
-	Expr Expr
-}
-
-func (stmt PrintStmt) Execute() {
-	value := stmt.Expr.Evaluate()
-	fmt.Printf("%v\n", value)
+func evaluateVariableExpr(expr ast.VariableExpr) interface{} {
+	return nil
 }
 
 func requireNumberOperand(operator lexing.Token, operand interface{}) {

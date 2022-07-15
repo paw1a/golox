@@ -1,4 +1,4 @@
-package parsing
+package ast
 
 import (
 	"bytes"
@@ -45,4 +45,20 @@ func (expr GroupingExpr) Print() string {
 	buffer.WriteString(") ")
 
 	return buffer.String()
+}
+
+func (expr VariableExpr) Print() string {
+	return ""
+}
+
+func (stmt ExpressionStmt) Print() string {
+	return ""
+}
+
+func (stmt PrintStmt) Print() string {
+	return ""
+}
+
+func (stmt VarDeclarationStmt) Print() string {
+	return ""
 }

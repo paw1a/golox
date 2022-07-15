@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/paw1a/golox/internal/lexing"
 	"github.com/paw1a/golox/internal/parsing"
+	"github.com/paw1a/golox/internal/runtime"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -69,7 +70,7 @@ func run(source string) {
 		parser := parsing.NewParser(lexer.Tokens)
 		statements := parser.Parse()
 		for _, stmt := range statements {
-			stmt.Execute()
+			runtime.Execute(stmt)
 		}
 	} else {
 		for _, err := range lexer.Errors {

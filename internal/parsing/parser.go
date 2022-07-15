@@ -2,6 +2,7 @@ package parsing
 
 import (
 	"fmt"
+	"github.com/paw1a/golox/internal/ast"
 	"github.com/paw1a/golox/internal/lexing"
 )
 
@@ -12,17 +13,43 @@ type Parser struct {
 	Errors []error
 }
 
-func (p *Parser) Parse() []Stmt {
-	statements := make([]Stmt, 0)
+func (p *Parser) Parse() []ast.Stmt {
+	statements := make([]ast.Stmt, 0)
 
 	for !p.isEof() {
-		statements = append(statements, p.statement())
+		statements = append(statements, p.declaration())
 	}
 
 	return statements
 }
 
-func (p *Parser) statement() Stmt {
+func (p *Parser) declaration() ast.Stmt {
+	if p.match(lexing.Var) {
+		p.advance()
+		return p.varDeclaration()
+	}
+
+	return p.statement()
+}
+
+func (p *Parser) varDeclaration() ast.Stmt {
+	p.requireToken(lexing.Identifier, "var identifier expected")
+	varName := p.advance()
+
+	var initializer ast.Expr
+	if p.peek().TokenType == lexing.Equal {
+		p.advance()
+		initializer = p.expression()
+	}
+
+	p.requireToken(lexing.Semicolon, "';' expected")
+	return ast.VarDeclarationStmt{
+		Name: varName,
+		Expr: initializer,
+	}
+}
+
+func (p *Parser) statement() ast.Stmt {
 	if p.match(lexing.Print) {
 		p.advance()
 		return p.printStatement()
@@ -31,30 +58,30 @@ func (p *Parser) statement() Stmt {
 	return p.expressionStatement()
 }
 
-func (p *Parser) printStatement() Stmt {
+func (p *Parser) printStatement() ast.Stmt {
 	expr := p.expression()
-	p.require(lexing.Semicolon, "';' expected")
-	return PrintStmt{Expr: expr}
+	p.requireToken(lexing.Semicolon, "';' expected")
+	return ast.PrintStmt{Expr: expr}
 }
 
-func (p *Parser) expressionStatement() Stmt {
+func (p *Parser) expressionStatement() ast.Stmt {
 	expr := p.expression()
-	p.require(lexing.Semicolon, "';' expected")
-	return ExpressionStmt{Expr: expr}
+	p.requireToken(lexing.Semicolon, "';' expected")
+	return ast.ExpressionStmt{Expr: expr}
 }
 
-func (p *Parser) expression() Expr {
+func (p *Parser) expression() ast.Expr {
 	return p.equality()
 }
 
-func (p *Parser) equality() Expr {
-	var expr Expr
+func (p *Parser) equality() ast.Expr {
+	var expr ast.Expr
 
 	expr = p.comparison()
 	for p.match(lexing.BangEqual, lexing.EqualEqual) {
 		operator := p.advance()
 		rightExpr := p.comparison()
-		expr = BinaryExpr{
+		expr = ast.BinaryExpr{
 			LeftExpr:  expr,
 			Operator:  operator,
 			RightExpr: rightExpr,
@@ -64,14 +91,14 @@ func (p *Parser) equality() Expr {
 	return expr
 }
 
-func (p *Parser) comparison() Expr {
-	var expr Expr
+func (p *Parser) comparison() ast.Expr {
+	var expr ast.Expr
 
 	expr = p.term()
 	for p.match(lexing.Less, lexing.LessEqual, lexing.Greater, lexing.GreaterEqual) {
 		operator := p.advance()
 		rightExpr := p.term()
-		expr = BinaryExpr{
+		expr = ast.BinaryExpr{
 			LeftExpr:  expr,
 			Operator:  operator,
 			RightExpr: rightExpr,
@@ -81,14 +108,14 @@ func (p *Parser) comparison() Expr {
 	return expr
 }
 
-func (p *Parser) term() Expr {
-	var expr Expr
+func (p *Parser) term() ast.Expr {
+	var expr ast.Expr
 
 	expr = p.factor()
 	for p.match(lexing.Minus, lexing.Plus) {
 		operator := p.advance()
 		rightExpr := p.factor()
-		expr = BinaryExpr{
+		expr = ast.BinaryExpr{
 			LeftExpr:  expr,
 			Operator:  operator,
 			RightExpr: rightExpr,
@@ -98,14 +125,14 @@ func (p *Parser) term() Expr {
 	return expr
 }
 
-func (p *Parser) factor() Expr {
-	var expr Expr
+func (p *Parser) factor() ast.Expr {
+	var expr ast.Expr
 
 	expr = p.unary()
 	for p.match(lexing.Star, lexing.Slash) {
 		operator := p.advance()
 		rightExpr := p.unary()
-		expr = BinaryExpr{
+		expr = ast.BinaryExpr{
 			LeftExpr:  expr,
 			Operator:  operator,
 			RightExpr: rightExpr,
@@ -115,11 +142,11 @@ func (p *Parser) factor() Expr {
 	return expr
 }
 
-func (p *Parser) unary() Expr {
+func (p *Parser) unary() ast.Expr {
 	for p.match(lexing.Bang, lexing.Minus) {
 		operator := p.advance()
 		rightExpr := p.unary()
-		return UnaryExpr{
+		return ast.UnaryExpr{
 			Operator:  operator,
 			RightExpr: rightExpr,
 		}
@@ -128,41 +155,43 @@ func (p *Parser) unary() Expr {
 	return p.primary()
 }
 
-func (p *Parser) primary() Expr {
+func (p *Parser) primary() ast.Expr {
 	switch {
 	case p.match(lexing.False):
 		p.advance()
-		return LiteralExpr{LiteralValue: false}
+		return ast.LiteralExpr{LiteralValue: false}
 	case p.match(lexing.True):
 		p.advance()
-		return LiteralExpr{LiteralValue: true}
+		return ast.LiteralExpr{LiteralValue: true}
 	case p.match(lexing.Nil):
 		p.advance()
-		return LiteralExpr{LiteralValue: nil}
+		return ast.LiteralExpr{LiteralValue: nil}
 	case p.match(lexing.Number, lexing.String):
-		astNode := LiteralExpr{LiteralValue: p.peek().Literal}
+		astNode := ast.LiteralExpr{LiteralValue: p.peek().Literal}
 		p.advance()
 		return astNode
 	case p.match(lexing.LeftParen):
 		p.advance()
 		expr := p.expression()
-		p.require(lexing.RightParen, "expect ')' token after expression")
-		return GroupingExpr{Expr: expr}
+		p.requireToken(lexing.RightParen, "expect ')' token after expression")
+		return ast.GroupingExpr{Expr: expr}
+	case p.match(lexing.Identifier):
+		return ast.VariableExpr{Name: p.advance()}
 	default:
-		runtimeError(p.peek(), "expect expression")
+		parseError(p.peek(), "expect expression")
 		return nil
 	}
 }
 
-func (p *Parser) require(tokenType lexing.TokenType, message string) {
+func (p *Parser) requireToken(tokenType lexing.TokenType, message string) {
 	if p.match(tokenType) {
 		p.advance()
 	} else {
-		runtimeError(p.peek(), message)
+		parseError(p.peek(), message)
 	}
 }
 
-func runtimeError(token lexing.Token, message string) {
+func parseError(token lexing.Token, message string) {
 	var errorMessage string
 	if token.TokenType == lexing.Eof {
 		errorMessage = fmt.Sprintf("line %d | at end of input: %s", token.Line, message)
@@ -173,5 +202,7 @@ func runtimeError(token lexing.Token, message string) {
 }
 
 func NewParser(tokens []lexing.Token) *Parser {
-	return &Parser{tokens: tokens}
+	return &Parser{
+		tokens: tokens,
+	}
 }
