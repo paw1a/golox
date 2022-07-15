@@ -53,5 +53,5 @@ func isString(value interface{}) bool {
 }
 
 func NewInterpreter() *Interpreter {
-	return &Interpreter{env: NewEnvironment()}
+	return &Interpreter{env: NewEnvironment(nil)}
 }

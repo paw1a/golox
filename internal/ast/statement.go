@@ -16,6 +16,10 @@ type PrintStmt struct {
 	Expr Expr
 }
 
+type BlockStmt struct {
+	Stmts []Stmt
+}
+
 type VarDeclarationStmt struct {
 	Name        lexing.Token
 	Initializer Expr

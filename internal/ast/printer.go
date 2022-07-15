@@ -66,3 +66,7 @@ func (stmt PrintStmt) Print() string {
 func (stmt VarDeclarationStmt) Print() string {
 	return ""
 }
+
+func (stmt BlockStmt) Print() string {
+	return ""
+}

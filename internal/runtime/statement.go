@@ -3,6 +3,7 @@ package runtime
 import (
 	"fmt"
 	"github.com/paw1a/golox/internal/ast"
+	"github.com/paw1a/golox/internal/lexing"
 )
 
 func (i Interpreter) Execute(stmt ast.Stmt) {
@@ -13,6 +14,10 @@ func (i Interpreter) Execute(stmt ast.Stmt) {
 		i.executePrintStmt(stmt.(ast.PrintStmt))
 	case ast.VarDeclarationStmt:
 		i.executeVarDeclarationStmt(stmt.(ast.VarDeclarationStmt))
+	case ast.BlockStmt:
+		i.executeBlockStmt(stmt.(ast.BlockStmt))
+	default:
+		runtimeError(lexing.Token{}, "invalid ast type")
 	}
 }
 
@@ -32,4 +37,17 @@ func (i Interpreter) executeVarDeclarationStmt(stmt ast.VarDeclarationStmt) {
 	}
 
 	i.env.define(stmt.Name.Lexeme, value)
+}
+
+func (i Interpreter) executeBlockStmt(blockStmt ast.BlockStmt) {
+	enclosingEnv := i.env
+
+	i.env = NewEnvironment(enclosingEnv)
+	defer func() {
+		i.env = enclosingEnv
+	}()
+
+	for _, stmt := range blockStmt.Stmts {
+		i.Execute(stmt)
+	}
 }

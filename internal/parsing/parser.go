@@ -14,7 +14,7 @@ type Parser struct {
 }
 
 func (p *Parser) Parse() []ast.Stmt {
-	statements := make([]ast.Stmt, 0)
+	var statements []ast.Stmt
 
 	for !p.isEof() {
 		statements = append(statements, p.declaration())
@@ -56,7 +56,24 @@ func (p *Parser) statement() ast.Stmt {
 		return p.printStatement()
 	}
 
+	if p.match(lexing.LeftBrace) {
+		p.advance()
+		return p.blockStatement()
+	}
+
 	return p.expressionStatement()
+}
+
+func (p *Parser) blockStatement() ast.Stmt {
+	var stmts []ast.Stmt
+
+	for !p.match(lexing.RightBrace) && !p.isEof() {
+		stmts = append(stmts, p.declaration())
+	}
+
+	p.requireToken(lexing.RightBrace, "'}' end of block expected")
+
+	return ast.BlockStmt{Stmts: stmts}
 }
 
 func (p *Parser) printStatement() ast.Stmt {
