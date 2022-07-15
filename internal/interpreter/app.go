@@ -40,10 +40,6 @@ func runFile(filename string) {
 	}
 
 	run(string(sourceBytes))
-
-	if HasError {
-		os.Exit(65)
-	}
 }
 
 func runPrompt() {
@@ -53,12 +49,12 @@ func runPrompt() {
 		fmt.Printf("golox >>> ")
 
 		line, err := in.ReadString('\n')
-		if err != nil || strings.TrimSpace(line) == "exit" {
+		line = strings.TrimSpace(line)
+		if err != nil || line == "exit" {
 			break
 		}
 
 		run(line)
-		HasError = false
 	}
 }
 
@@ -66,16 +62,35 @@ func run(source string) {
 	lexer := lexing.NewLexer(source)
 	lexer.ScanTokens()
 
-	if len(lexer.Errors) == 0 {
-		parser := parsing.NewParser(lexer.Tokens)
-		statements := parser.Parse()
-		for _, stmt := range statements {
-			runtime.Execute(stmt)
-		}
-	} else {
+	if len(lexer.Errors) != 0 {
 		for _, err := range lexer.Errors {
 			fmt.Printf("%s\n", err.Error())
 		}
 		HasError = true
+		return
+	}
+
+	parser := parsing.NewParser(lexer.Tokens)
+	statements := parser.Parse()
+
+	if len(parser.Errors) != 0 {
+		for _, err := range parser.Errors {
+			fmt.Printf("%s\n", err.Error())
+		}
+		HasError = true
+		return
+	}
+
+	inter := runtime.NewInterpreter()
+
+	defer runtimeRecoverFunc()
+	for _, stmt := range statements {
+		inter.Execute(stmt)
+	}
+}
+
+func runtimeRecoverFunc() {
+	if err := recover(); err != nil {
+		fmt.Printf("%v\n", err)
 	}
 }

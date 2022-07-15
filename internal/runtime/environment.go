@@ -23,6 +23,6 @@ func (e Environment) get(name lexing.Token) interface{} {
 	return nil
 }
 
-func NewEnvironment() Environment {
-	return Environment{Objects: make(map[string]interface{})}
+func NewEnvironment() *Environment {
+	return &Environment{Objects: make(map[string]interface{})}
 }

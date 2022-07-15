@@ -5,6 +5,10 @@ import (
 	"github.com/paw1a/golox/internal/lexing"
 )
 
+type Interpreter struct {
+	env *Environment
+}
+
 func runtimeError(token lexing.Token, message string) {
 	var errorMessage string
 	if token.TokenType == lexing.Eof {
@@ -46,4 +50,8 @@ func isString(value interface{}) bool {
 		return true
 	}
 	return false
+}
+
+func NewInterpreter() *Interpreter {
+	return &Interpreter{env: NewEnvironment()}
 }

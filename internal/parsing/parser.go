@@ -24,6 +24,8 @@ func (p *Parser) Parse() []ast.Stmt {
 }
 
 func (p *Parser) declaration() ast.Stmt {
+	defer p.parseRecoverFunc()
+
 	if p.match(lexing.Var) {
 		p.advance()
 		return p.varDeclaration()
@@ -199,6 +201,12 @@ func parseError(token lexing.Token, message string) {
 		errorMessage = fmt.Sprintf("line %d | at '%s': %s", token.Line, token.Lexeme, message)
 	}
 	panic(errorMessage)
+}
+
+func (p *Parser) parseRecoverFunc() {
+	if err := recover(); err != nil {
+		p.Errors = append(p.Errors, fmt.Errorf("%v", err))
+	}
 }
 
 func NewParser(tokens []lexing.Token) *Parser {

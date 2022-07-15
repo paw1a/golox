@@ -5,26 +5,26 @@ import (
 	"github.com/paw1a/golox/internal/ast"
 )
 
-func Execute(stmt ast.Stmt) {
+func (i Interpreter) Execute(stmt ast.Stmt) {
 	switch stmt.(type) {
 	case ast.ExpressionStmt:
-		executeExprStmt(stmt.(ast.ExpressionStmt))
+		i.executeExprStmt(stmt.(ast.ExpressionStmt))
 	case ast.PrintStmt:
-		executePrintStmt(stmt.(ast.PrintStmt))
+		i.executePrintStmt(stmt.(ast.PrintStmt))
 	case ast.VarDeclarationStmt:
-		executeVarDeclarationStmt(stmt.(ast.VarDeclarationStmt))
+		i.executeVarDeclarationStmt(stmt.(ast.VarDeclarationStmt))
 	}
 }
 
-func executeExprStmt(stmt ast.ExpressionStmt) {
+func (i Interpreter) executeExprStmt(stmt ast.ExpressionStmt) {
 	Evaluate(stmt.Expr)
 }
 
-func executePrintStmt(stmt ast.PrintStmt) {
+func (i Interpreter) executePrintStmt(stmt ast.PrintStmt) {
 	value := Evaluate(stmt.Expr)
 	fmt.Printf("%v\n", value)
 }
 
-func executeVarDeclarationStmt(stmt ast.VarDeclarationStmt) {
+func (i Interpreter) executeVarDeclarationStmt(stmt ast.VarDeclarationStmt) {
 
 }
