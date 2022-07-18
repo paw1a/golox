@@ -1,9 +1,12 @@
 package parsing
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/paw1a/golox/internal/ast"
 	"github.com/paw1a/golox/internal/lexing"
+	"strconv"
+	"strings"
 )
 
 type Parser struct {
@@ -11,6 +14,7 @@ type Parser struct {
 	current int
 
 	Errors []error
+	lines  []string
 }
 
 func (p *Parser) Parse() []ast.Stmt {
@@ -18,7 +22,6 @@ func (p *Parser) Parse() []ast.Stmt {
 
 	for !p.isEof() {
 		statements = append(statements, p.declaration())
-
 	}
 
 	return statements
@@ -117,7 +120,7 @@ func (p *Parser) assignment() ast.Expr {
 			}
 		}
 
-		parseError(equalToken, "invalid assignment target")
+		p.parseError(equalToken, "invalid assignment target")
 	}
 
 	return expr
@@ -228,7 +231,7 @@ func (p *Parser) primary() ast.Expr {
 		return ast.VariableExpr{Name: p.advance()}
 	}
 
-	parseError(p.peek(), "expect expression")
+	p.parseError(p.peek(), "expect expression")
 	return nil
 }
 
@@ -236,19 +239,25 @@ func (p *Parser) requireToken(tokenType lexing.TokenType, message string) lexing
 	if p.match(tokenType) {
 		return p.advance()
 	} else {
-		parseError(p.peek(), message)
+		p.parseError(p.peek(), message)
 		return lexing.Token{}
 	}
 }
 
-func parseError(token lexing.Token, message string) {
-	var errorMessage string
-	if token.TokenType == lexing.Eof {
-		errorMessage = fmt.Sprintf("line %d | at end of input: %s", token.Line, message)
-	} else {
-		errorMessage = fmt.Sprintf("line %d | at '%s': %s", token.Line, token.Lexeme, message)
-	}
-	panic(errorMessage)
+func (p *Parser) parseError(token lexing.Token, message string) {
+	var buffer bytes.Buffer
+	buffer.WriteString(fmt.Sprintf("[ %d:%d ]: error: %s\n",
+		token.Line, token.Position, message))
+
+	lineStr := strconv.Itoa(token.Line)
+	buffer.WriteString(fmt.Sprintf("      %d |         %s\n", token.Line, p.lines[token.Line-1]))
+	buffer.WriteString(fmt.Sprintf("      "))
+	buffer.WriteString(strings.Repeat(" ", len(lineStr)))
+	buffer.WriteString(" |         ")
+	buffer.WriteString(fmt.Sprintf("%s^", strings.Repeat(" ", token.Position)))
+	buffer.WriteString(fmt.Sprintf("%s\n", strings.Repeat("~", len(token.Lexeme)-1)))
+
+	panic(buffer.String())
 }
 
 func (p *Parser) parseRecoverFunc() {
@@ -270,8 +279,9 @@ func (p *Parser) synchronize() {
 	}
 }
 
-func NewParser(tokens []lexing.Token) *Parser {
+func NewParser(tokens []lexing.Token, lines []string) *Parser {
 	return &Parser{
 		tokens: tokens,
+		lines:  lines,
 	}
 }

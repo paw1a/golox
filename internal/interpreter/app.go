@@ -70,7 +70,7 @@ func run(source string) {
 		return
 	}
 
-	parser := parsing.NewParser(lexer.Tokens)
+	parser := parsing.NewParser(lexer.Tokens, lexer.Lines)
 	statements := parser.Parse()
 
 	if len(parser.Errors) != 0 {
@@ -80,6 +80,7 @@ func run(source string) {
 		HasError = true
 		return
 	}
+	return
 
 	inter := runtime.NewInterpreter()
 

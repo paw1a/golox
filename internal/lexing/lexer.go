@@ -1,19 +1,24 @@
 package lexing
 
 import (
+	"bytes"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 type Lexer struct {
 	Tokens []Token
-	source string
 
 	start   int
 	current int
 	line    int
 
 	Errors []error
+
+	source    string
+	lineStart int
+	Lines     []string
 }
 
 func (l *Lexer) ScanTokens() []Token {
@@ -22,7 +27,11 @@ func (l *Lexer) ScanTokens() []Token {
 		l.ScanToken()
 	}
 
-	l.Tokens = append(l.Tokens, NewToken(Eof, "", nil, l.line))
+	if l.source[len(l.source)-2] != '\n' {
+		l.nextLine()
+	}
+
+	l.Tokens = append(l.Tokens, NewToken(Eof, "", nil, l.line, l.start-l.lineStart+1))
 
 	return l.Tokens
 }
@@ -93,7 +102,7 @@ func (l *Lexer) ScanToken() {
 	case '"':
 		l.string()
 	case '\n':
-		l.line++
+		l.nextLine()
 	case ' ', '\t', '\r':
 	default:
 		if l.isDigit(c) {
@@ -109,7 +118,7 @@ func (l *Lexer) ScanToken() {
 func (l *Lexer) string() {
 	for !l.isEOF() && l.peek() != '"' {
 		if l.peek() == '\n' {
-			l.line++
+			l.nextLine()
 		}
 		l.advance()
 	}
@@ -153,7 +162,7 @@ func (l *Lexer) blockComment() {
 			if l.peek() == '/' {
 				l.advance()
 				if l.peek() == '\n' {
-					l.line++
+					l.nextLine()
 					l.advance()
 				}
 				return
@@ -169,7 +178,7 @@ func (l *Lexer) blockComment() {
 		}
 
 		if l.peek() == '\n' {
-			l.line++
+			l.nextLine()
 		}
 
 		if l.isEOF() {
@@ -219,12 +228,23 @@ func (l *Lexer) addToken(tokenType TokenType) {
 
 func (l *Lexer) addTokenWithLiteral(tokenType TokenType, literal interface{}) {
 	lexeme := l.source[l.start:l.current]
-	l.Tokens = append(l.Tokens, NewToken(tokenType, lexeme, literal, l.line))
+	position := l.start - l.lineStart
+	l.Tokens = append(l.Tokens, NewToken(tokenType, lexeme, literal, l.line, position))
 }
 
 func (l *Lexer) error(message string) {
-	err := fmt.Errorf("line %d | error: %s", l.line, message)
-	l.Errors = append(l.Errors, err)
+	var buffer bytes.Buffer
+	buffer.WriteString(fmt.Sprintf("[ %d:%d ]: error: %s\n",
+		l.line, l.current-l.lineStart-1, message))
+
+	lineStr := strconv.Itoa(l.line)
+	buffer.WriteString(fmt.Sprintf("      %d |         %s\n", l.line, l.source[l.lineStart:l.current]))
+	buffer.WriteString(fmt.Sprintf("      "))
+	buffer.WriteString(strings.Repeat(" ", len(lineStr)))
+	buffer.WriteString(" |         ")
+	buffer.WriteString(fmt.Sprintf("%s^\n", strings.Repeat(" ", l.current-l.lineStart-1)))
+
+	l.Errors = append(l.Errors, fmt.Errorf(buffer.String()))
 }
 
 func NewLexer(source string) *Lexer {

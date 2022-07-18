@@ -41,3 +41,9 @@ func (l *Lexer) isAlpha(c uint8) bool {
 func (l *Lexer) isEOF() bool {
 	return l.current >= len(l.source)
 }
+
+func (l *Lexer) nextLine() {
+	l.line++
+	l.Lines = append(l.Lines, l.source[l.lineStart:l.current])
+	l.lineStart = l.current
+}

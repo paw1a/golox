@@ -56,6 +56,7 @@ type Token struct {
 	Lexeme    string
 	Literal   interface{}
 	Line      int
+	Position  int
 }
 
 func (t *Token) String() string {
@@ -63,11 +64,12 @@ func (t *Token) String() string {
 		t.TokenType, t.Lexeme, t.Literal, t.Line)
 }
 
-func NewToken(tokenType TokenType, lexeme string, literal interface{}, line int) Token {
+func NewToken(tokenType TokenType, lexeme string, literal interface{}, line int, position int) Token {
 	return Token{
 		TokenType: tokenType,
 		Lexeme:    lexeme,
 		Literal:   literal,
 		Line:      line,
+		Position:  position,
 	}
 }
