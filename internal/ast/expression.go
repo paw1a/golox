@@ -33,3 +33,7 @@ type AssignExpr struct {
 	Name        lexing.Token
 	Initializer Expr
 }
+
+type CommaExpr struct {
+	Exprs []Expr
+}

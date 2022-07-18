@@ -18,6 +18,7 @@ func (p *Parser) Parse() []ast.Stmt {
 
 	for !p.isEof() {
 		statements = append(statements, p.declaration())
+
 	}
 
 	return statements
@@ -91,6 +92,15 @@ func (p *Parser) expressionStatement() ast.Stmt {
 func (p *Parser) expression() ast.Expr {
 	return p.assignment()
 }
+
+//
+//func (p *Parser) comma() ast.Expr {
+//	expr := p.assignment()
+//
+//	for p.match(lexing.Comma) {
+//
+//	}
+//}
 
 func (p *Parser) assignment() ast.Expr {
 	expr := p.equality()
@@ -216,10 +226,10 @@ func (p *Parser) primary() ast.Expr {
 		return ast.GroupingExpr{Expr: expr}
 	case p.match(lexing.Identifier):
 		return ast.VariableExpr{Name: p.advance()}
-	default:
-		parseError(p.peek(), "expect expression")
-		return nil
 	}
+
+	parseError(p.peek(), "expect expression")
+	return nil
 }
 
 func (p *Parser) requireToken(tokenType lexing.TokenType, message string) lexing.Token {
@@ -244,6 +254,19 @@ func parseError(token lexing.Token, message string) {
 func (p *Parser) parseRecoverFunc() {
 	if err := recover(); err != nil {
 		p.Errors = append(p.Errors, fmt.Errorf("%v", err))
+		p.synchronize()
+	}
+}
+
+func (p *Parser) synchronize() {
+	for !p.isEof() {
+		if p.match(lexing.Semicolon, lexing.Class, lexing.Fun,
+			lexing.For, lexing.If, lexing.While, lexing.Print,
+			lexing.Return, lexing.Var) {
+			p.advance()
+			return
+		}
+		p.advance()
 	}
 }
 
