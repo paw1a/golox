@@ -119,6 +119,8 @@ func (i Interpreter) evaluateBinaryExpr(expr ast.BinaryExpr) interface{} {
 		default:
 			runtimeError(expr.Operator, "number, string or nil operands expected")
 		}
+	case lexing.Comma:
+		return rightValue
 	}
 
 	return nil

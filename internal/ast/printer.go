@@ -48,11 +48,19 @@ func (expr GroupingExpr) Print() string {
 }
 
 func (expr VariableExpr) Print() string {
-	return ""
+	return expr.Name.Lexeme
 }
 
 func (expr AssignExpr) Print() string {
-	return ""
+	var buffer bytes.Buffer
+
+	buffer.WriteString(" (")
+	buffer.WriteString("= ")
+	buffer.WriteString(expr.Name.Lexeme)
+	buffer.WriteString(expr.Initializer.Print())
+	buffer.WriteString(") ")
+
+	return buffer.String()
 }
 
 func (stmt ExpressionStmt) Print() string {

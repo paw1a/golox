@@ -93,24 +93,32 @@ func (p *Parser) expressionStatement() ast.Stmt {
 }
 
 func (p *Parser) expression() ast.Expr {
-	return p.assignment()
+	return p.comma()
 }
 
-//
-//func (p *Parser) comma() ast.Expr {
-//	expr := p.assignment()
-//
-//	for p.match(lexing.Comma) {
-//
-//	}
-//}
+func (p *Parser) comma() ast.Expr {
+	var expr ast.Expr
+
+	expr = p.assignment()
+	for p.match(lexing.Comma) {
+		operator := p.advance()
+		rightExpr := p.assignment()
+		expr = ast.BinaryExpr{
+			LeftExpr:  expr,
+			Operator:  operator,
+			RightExpr: rightExpr,
+		}
+	}
+
+	return expr
+}
 
 func (p *Parser) assignment() ast.Expr {
 	expr := p.equality()
 
 	if p.match(lexing.Equal) {
 		equalToken := p.advance()
-		value := p.expression()
+		value := p.assignment()
 
 		switch expr.(type) {
 		case ast.VariableExpr:
