@@ -1,0 +1,10 @@
+print "" or 1;
+print "hello" and !0;
+
+if (4 < 5 and "hello") {
+    print true;
+} else {
+    print false;
+}
+
+print true or false ? "a" : "b";

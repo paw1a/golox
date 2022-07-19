@@ -7,7 +7,9 @@ blockStatement: "{" declaration* "}"
 ifStatement: "if" "(" expression ")" statement ("else" statement)?
 expression: comma
 comma: comma "," assignment | assignment
-assignment: IDENTIFIER "=" assignment | equality
+assignment: IDENTIFIER "=" assignment | logicalOr
+logicalOr: logicalAnd ("or" logicalAnd)*
+logicalAnd: equality ("and" equality)*
 equality: comparison (("!=" | "==" ) comparison)*
 comparison: term (("<" | ">" | "<=" | ">=") term)*
 term: factor (("-" | "+") factor)*

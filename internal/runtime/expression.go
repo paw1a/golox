@@ -21,6 +21,8 @@ func (i Interpreter) Evaluate(expr ast.Expr) interface{} {
 		return i.evaluateAssignExpr(expr.(ast.AssignExpr))
 	case ast.TernaryExpr:
 		return i.evaluateTernaryExpr(expr.(ast.TernaryExpr))
+	case ast.LogicalExpr:
+		return i.evaluateLogicalExpr(expr.(ast.LogicalExpr))
 	default:
 		runtimeError(lexing.Token{}, "invalid ast type")
 	}
@@ -170,6 +172,17 @@ func (i Interpreter) evaluateTernaryExpr(expr ast.TernaryExpr) interface{} {
 	}
 
 	return value
+}
+
+func (i Interpreter) evaluateLogicalExpr(expr ast.LogicalExpr) interface{} {
+	leftValue := i.Evaluate(expr.LeftExpr)
+
+	if expr.Operator.TokenType == lexing.Or && isTruthy(leftValue) ||
+		expr.Operator.TokenType == lexing.And && !isTruthy(leftValue) {
+		return leftValue
+	}
+
+	return i.Evaluate(expr.RightExpr)
 }
 
 func requireNumberOperand(operator lexing.Token, operand interface{}) {

@@ -138,7 +138,7 @@ func (p *Parser) comma() ast.Expr {
 }
 
 func (p *Parser) assignment() ast.Expr {
-	expr := p.equality()
+	expr := p.logicalOr()
 
 	if p.match(lexing.Equal) {
 		equalToken := p.advance()
@@ -157,13 +157,47 @@ func (p *Parser) assignment() ast.Expr {
 
 	if p.match(lexing.Question) {
 		p.advance()
-		trueValue := p.equality()
+		trueValue := p.logicalOr()
 		p.requireToken(lexing.Colon, "ternary operator expect ':'")
-		falseValue := p.equality()
+		falseValue := p.logicalOr()
 		return ast.TernaryExpr{
 			Condition: expr,
 			TrueExpr:  trueValue,
 			FalseExpr: falseValue,
+		}
+	}
+
+	return expr
+}
+
+func (p *Parser) logicalOr() ast.Expr {
+	var expr ast.Expr
+
+	expr = p.logicalAnd()
+	for p.match(lexing.Or) {
+		operator := p.advance()
+		rightExpr := p.logicalAnd()
+		expr = ast.LogicalExpr{
+			LeftExpr:  expr,
+			Operator:  operator,
+			RightExpr: rightExpr,
+		}
+	}
+
+	return expr
+}
+
+func (p *Parser) logicalAnd() ast.Expr {
+	var expr ast.Expr
+
+	expr = p.equality()
+	for p.match(lexing.And) {
+		operator := p.advance()
+		rightExpr := p.equality()
+		expr = ast.LogicalExpr{
+			LeftExpr:  expr,
+			Operator:  operator,
+			RightExpr: rightExpr,
 		}
 	}
 

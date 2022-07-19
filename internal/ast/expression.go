@@ -39,3 +39,9 @@ type TernaryExpr struct {
 	TrueExpr  Expr
 	FalseExpr Expr
 }
+
+type LogicalExpr struct {
+	LeftExpr  Expr
+	Operator  lexing.Token
+	RightExpr Expr
+}

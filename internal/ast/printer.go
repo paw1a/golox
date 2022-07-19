@@ -77,6 +77,18 @@ func (expr TernaryExpr) Print() string {
 	return buffer.String()
 }
 
+func (expr LogicalExpr) Print() string {
+	var buffer bytes.Buffer
+
+	buffer.WriteString(" (")
+	buffer.WriteString(expr.Operator.Lexeme)
+	buffer.WriteString(expr.LeftExpr.Print())
+	buffer.WriteString(expr.RightExpr.Print())
+	buffer.WriteString(") ")
+
+	return buffer.String()
+}
+
 func (stmt ExpressionStmt) Print() string {
 	var buffer bytes.Buffer
 
