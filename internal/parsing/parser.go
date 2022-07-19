@@ -255,7 +255,10 @@ func (p *Parser) parseError(token lexing.Token, message string) {
 	buffer.WriteString(strings.Repeat(" ", len(lineStr)))
 	buffer.WriteString(" |         ")
 	buffer.WriteString(fmt.Sprintf("%s^", strings.Repeat(" ", token.Position)))
-	buffer.WriteString(fmt.Sprintf("%s\n", strings.Repeat("~", len(token.Lexeme)-1)))
+
+	if len(token.Lexeme) > 0 {
+		buffer.WriteString(fmt.Sprintf("%s\n", strings.Repeat("~", len(token.Lexeme)-1)))
+	}
 
 	panic(buffer.String())
 }

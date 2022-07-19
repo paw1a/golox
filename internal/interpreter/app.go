@@ -70,6 +70,10 @@ func run(source string) {
 		return
 	}
 
+	//for _, token := range lexer.Tokens {
+	//	fmt.Printf("%d %d\n", token.Line, token.Position)
+	//}
+
 	parser := parsing.NewParser(lexer.Tokens, lexer.Lines)
 	statements := parser.Parse()
 
@@ -80,7 +84,6 @@ func run(source string) {
 		HasError = true
 		return
 	}
-	return
 
 	inter := runtime.NewInterpreter()
 

@@ -28,7 +28,9 @@ func (l *Lexer) ScanTokens() []Token {
 	}
 
 	if l.source[len(l.source)-2] != '\n' {
+		l.Tokens = append(l.Tokens, NewToken(Eof, "", nil, l.line, len(l.source)))
 		l.nextLine()
+		return l.Tokens
 	}
 
 	l.Tokens = append(l.Tokens, NewToken(Eof, "", nil, l.line, l.start-l.lineStart+1))
@@ -242,6 +244,7 @@ func (l *Lexer) error(message string) {
 	buffer.WriteString(fmt.Sprintf("      "))
 	buffer.WriteString(strings.Repeat(" ", len(lineStr)))
 	buffer.WriteString(" |         ")
+	fmt.Printf("%d\n", l.current-l.lineStart-1)
 	buffer.WriteString(fmt.Sprintf("%s^\n", strings.Repeat(" ", l.current-l.lineStart-1)))
 
 	l.Errors = append(l.Errors, fmt.Errorf(buffer.String()))
