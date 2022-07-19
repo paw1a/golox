@@ -54,6 +54,10 @@ func runPrompt() {
 			break
 		}
 
+		if !strings.HasSuffix(line, ";") && !strings.HasSuffix(line, "}") {
+			line += ";"
+		}
+
 		run(line)
 	}
 }
