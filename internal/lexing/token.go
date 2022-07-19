@@ -19,6 +19,8 @@ const (
 	Semicolon
 	Slash
 	Star
+	Question
+	Colon
 
 	Bang
 	BangEqual

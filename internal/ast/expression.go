@@ -34,6 +34,8 @@ type AssignExpr struct {
 	Initializer Expr
 }
 
-type CommaExpr struct {
-	Exprs []Expr
+type TernaryExpr struct {
+	Condition Expr
+	TrueExpr  Expr
+	FalseExpr Expr
 }

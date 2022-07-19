@@ -19,6 +19,8 @@ func (i Interpreter) Evaluate(expr ast.Expr) interface{} {
 		return i.evaluateVariableExpr(expr.(ast.VariableExpr))
 	case ast.AssignExpr:
 		return i.evaluateAssignExpr(expr.(ast.AssignExpr))
+	case ast.TernaryExpr:
+		return i.evaluateTernaryExpr(expr.(ast.TernaryExpr))
 	default:
 		runtimeError(lexing.Token{}, "invalid ast type")
 	}
@@ -154,6 +156,19 @@ func (i Interpreter) evaluateVariableExpr(expr ast.VariableExpr) interface{} {
 func (i Interpreter) evaluateAssignExpr(expr ast.AssignExpr) interface{} {
 	value := i.Evaluate(expr.Initializer)
 	i.env.assign(expr.Name, value)
+	return value
+}
+
+func (i Interpreter) evaluateTernaryExpr(expr ast.TernaryExpr) interface{} {
+	conditionValue := i.Evaluate(expr.Condition)
+
+	var value interface{}
+	if isTruthy(conditionValue) {
+		value = i.Evaluate(expr.TrueExpr)
+	} else {
+		value = i.Evaluate(expr.FalseExpr)
+	}
+
 	return value
 }
 

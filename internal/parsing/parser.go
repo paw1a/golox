@@ -131,6 +131,18 @@ func (p *Parser) assignment() ast.Expr {
 		p.parseError(equalToken, "invalid assignment target")
 	}
 
+	if p.match(lexing.Question) {
+		p.advance()
+		trueValue := p.equality()
+		p.requireToken(lexing.Colon, "ternary operator expect ':'")
+		falseValue := p.equality()
+		return ast.TernaryExpr{
+			Condition: expr,
+			TrueExpr:  trueValue,
+			FalseExpr: falseValue,
+		}
+	}
+
 	return expr
 }
 

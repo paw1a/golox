@@ -61,6 +61,10 @@ func (l *Lexer) ScanToken() {
 		l.addToken(Semicolon)
 	case '*':
 		l.addToken(Star)
+	case '?':
+		l.addToken(Question)
+	case ':':
+		l.addToken(Colon)
 	case '!':
 		if l.peek() == '=' {
 			l.advance()

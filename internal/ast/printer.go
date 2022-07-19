@@ -63,6 +63,20 @@ func (expr AssignExpr) Print() string {
 	return buffer.String()
 }
 
+func (expr TernaryExpr) Print() string {
+	var buffer bytes.Buffer
+
+	buffer.WriteString(" (")
+	buffer.WriteString("? ")
+	buffer.WriteString(expr.Condition.Print())
+	buffer.WriteString(expr.TrueExpr.Print())
+	buffer.WriteString(" : ")
+	buffer.WriteString(expr.FalseExpr.Print())
+	buffer.WriteString(") ")
+
+	return buffer.String()
+}
+
 func (stmt ExpressionStmt) Print() string {
 	return ""
 }
