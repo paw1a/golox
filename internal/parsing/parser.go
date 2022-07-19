@@ -55,22 +55,34 @@ func (p *Parser) varDeclaration() ast.Stmt {
 }
 
 func (p *Parser) statement() ast.Stmt {
-	if p.match(lexing.Print) {
+	switch {
+	case p.match(lexing.Print):
 		p.advance()
 		return p.printStatement()
-	}
-
-	if p.match(lexing.LeftBrace) {
+	case p.match(lexing.LeftBrace):
 		p.advance()
 		return p.blockStatement()
-	}
-
-	if p.match(lexing.If) {
+	case p.match(lexing.If):
 		p.advance()
 		return p.ifStatement()
+	case p.match(lexing.While):
+		p.advance()
+		return p.whileStatement()
 	}
 
 	return p.expressionStatement()
+}
+
+func (p *Parser) whileStatement() ast.Stmt {
+	p.requireToken(lexing.LeftParen, "while statement expect '(' before condition")
+	conditionExpr := p.expression()
+	p.requireToken(lexing.RightParen, "while statement expect ')' after condition")
+	statement := p.statement()
+
+	return ast.WhileStmt{
+		ConditionExpr: conditionExpr,
+		Statement:     statement,
+	}
 }
 
 func (p *Parser) ifStatement() ast.Stmt {

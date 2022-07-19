@@ -1,10 +1,14 @@
 program: declaration*
+
 declaration: varDeclaration | statement
 varDeclaration: "var" IDENTIFIER ("=" expression)? ";"
-statement: printStatement | blockStatement | ifStatement
+
+statement: printStatement | blockStatement | ifStatement | whileStatement
 printStatement: "print" expression ";"
 blockStatement: "{" declaration* "}"
 ifStatement: "if" "(" expression ")" statement ("else" statement)?
+whileStatement: "while" "(" expression ")" statement
+
 expression: comma
 comma: comma "," assignment | assignment
 assignment: IDENTIFIER "=" assignment | logicalOr
@@ -15,4 +19,5 @@ comparison: term (("<" | ">" | "<=" | ">=") term)*
 term: factor (("-" | "+") factor)*
 factor: unary (("*" | "/") unary)*
 unary: ("-" | "!") unary | primary
+
 primary: STRING | NUMBER | "true" | "false" | "nil" | IDENTIFIER | "(" expression ")"

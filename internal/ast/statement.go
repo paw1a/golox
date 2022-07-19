@@ -30,3 +30,8 @@ type IfStmt struct {
 	IfStatement   Stmt
 	ElseStatement Stmt
 }
+
+type WhileStmt struct {
+	ConditionExpr Expr
+	Statement     Stmt
+}

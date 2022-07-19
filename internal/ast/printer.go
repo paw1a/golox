@@ -143,3 +143,7 @@ func (stmt BlockStmt) Print() string {
 func (stmt IfStmt) Print() string {
 	return ""
 }
+
+func (stmt WhileStmt) Print() string {
+	return ""
+}
