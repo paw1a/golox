@@ -1,0 +1,24 @@
+if (4 < 5) {
+    print 1;
+} else {
+    var a = 10;
+    print a;
+}
+
+if (false) {
+    print "false";
+} else {
+    print "true";
+}
+
+if ("hello")
+    print "hello";
+
+if (true)
+    if (5 < 4) {
+        print "4 < 5";
+    } else {
+        print "inner else";
+    }
+else
+    print "outer else";

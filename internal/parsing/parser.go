@@ -65,7 +65,31 @@ func (p *Parser) statement() ast.Stmt {
 		return p.blockStatement()
 	}
 
+	if p.match(lexing.If) {
+		p.advance()
+		return p.ifStatement()
+	}
+
 	return p.expressionStatement()
+}
+
+func (p *Parser) ifStatement() ast.Stmt {
+	p.requireToken(lexing.LeftParen, "if statement expect '(' before condition")
+	conditionExpr := p.expression()
+	p.requireToken(lexing.RightParen, "if statement expect ')' after condition")
+	ifStatement := p.statement()
+
+	var elseStatement ast.Stmt
+	if p.match(lexing.Else) {
+		p.advance()
+		elseStatement = p.statement()
+	}
+
+	return ast.IfStmt{
+		ConditionExpr: conditionExpr,
+		IfStatement:   ifStatement,
+		ElseStatement: elseStatement,
+	}
 }
 
 func (p *Parser) blockStatement() ast.Stmt {

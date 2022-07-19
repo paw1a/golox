@@ -24,3 +24,9 @@ type VarDeclarationStmt struct {
 	Name        lexing.Token
 	Initializer Expr
 }
+
+type IfStmt struct {
+	ConditionExpr Expr
+	IfStatement   Stmt
+	ElseStatement Stmt
+}

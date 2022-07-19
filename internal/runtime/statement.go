@@ -16,6 +16,8 @@ func (i Interpreter) Execute(stmt ast.Stmt) {
 		i.executeVarDeclarationStmt(stmt.(ast.VarDeclarationStmt))
 	case ast.BlockStmt:
 		i.executeBlockStmt(stmt.(ast.BlockStmt))
+	case ast.IfStmt:
+		i.executeIfStmt(stmt.(ast.IfStmt))
 	default:
 		runtimeError(lexing.Token{}, "invalid ast type")
 	}
@@ -49,5 +51,18 @@ func (i Interpreter) executeBlockStmt(blockStmt ast.BlockStmt) {
 
 	for _, stmt := range blockStmt.Stmts {
 		i.Execute(stmt)
+	}
+}
+
+func (i Interpreter) executeIfStmt(stmt ast.IfStmt) {
+	conditionValue := i.Evaluate(stmt.ConditionExpr)
+
+	if isTruthy(conditionValue) {
+		i.Execute(stmt.IfStatement)
+		return
+	}
+
+	if stmt.ElseStatement != nil {
+		i.Execute(stmt.ElseStatement)
 	}
 }

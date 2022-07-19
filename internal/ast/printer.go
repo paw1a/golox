@@ -78,17 +78,56 @@ func (expr TernaryExpr) Print() string {
 }
 
 func (stmt ExpressionStmt) Print() string {
-	return ""
+	var buffer bytes.Buffer
+
+	buffer.WriteString(" (")
+	buffer.WriteString("expr ")
+	buffer.WriteString(stmt.Expr.Print())
+	buffer.WriteString(") ")
+
+	return buffer.String()
 }
 
 func (stmt PrintStmt) Print() string {
-	return ""
+	var buffer bytes.Buffer
+
+	buffer.WriteString(" (")
+	buffer.WriteString("print ")
+	buffer.WriteString(stmt.Expr.Print())
+	buffer.WriteString(") ")
+
+	return buffer.String()
 }
 
 func (stmt VarDeclarationStmt) Print() string {
-	return ""
+	var buffer bytes.Buffer
+
+	buffer.WriteString(" (")
+	buffer.WriteString("var ")
+	buffer.WriteString(stmt.Name.Lexeme)
+	if stmt.Initializer != nil {
+		buffer.WriteString(" = ")
+		buffer.WriteString(stmt.Initializer.Print())
+	}
+	buffer.WriteString(") ")
+
+	return buffer.String()
 }
 
 func (stmt BlockStmt) Print() string {
+	var buffer bytes.Buffer
+
+	buffer.WriteString(" {")
+	for _, st := range stmt.Stmts {
+		buffer.WriteString(" ")
+		buffer.WriteString(st.Print())
+		buffer.WriteString(";")
+	}
+	buffer.WriteString("} ")
+
+	return buffer.String()
+}
+
+func (stmt IfStmt) Print() string {
 	return ""
 }
