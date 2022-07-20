@@ -20,6 +20,8 @@ func (i Interpreter) Execute(stmt ast.Stmt) {
 		i.executeIfStmt(stmt.(ast.IfStmt))
 	case ast.WhileStmt:
 		i.executeWhileStmt(stmt.(ast.WhileStmt))
+	case ast.ForStmt:
+		i.executeForStmt(stmt.(ast.ForStmt))
 	default:
 		runtimeError(lexing.Token{}, "invalid ast type")
 	}
@@ -45,7 +47,6 @@ func (i Interpreter) executeVarDeclarationStmt(stmt ast.VarDeclarationStmt) {
 
 func (i Interpreter) executeBlockStmt(blockStmt ast.BlockStmt) {
 	enclosingEnv := i.env
-
 	i.env = NewEnvironment(enclosingEnv)
 	defer func() {
 		i.env = enclosingEnv
@@ -72,5 +73,24 @@ func (i Interpreter) executeIfStmt(stmt ast.IfStmt) {
 func (i Interpreter) executeWhileStmt(stmt ast.WhileStmt) {
 	for isTruthy(i.Evaluate(stmt.ConditionExpr)) {
 		i.Execute(stmt.Statement)
+	}
+}
+
+func (i Interpreter) executeForStmt(stmt ast.ForStmt) {
+	enclosingEnv := i.env
+	i.env = NewEnvironment(enclosingEnv)
+	defer func() {
+		i.env = enclosingEnv
+	}()
+
+	if stmt.InitializerStmt != nil {
+		i.Execute(stmt.InitializerStmt)
+	}
+
+	for isTruthy(i.Evaluate(stmt.ConditionExpr)) {
+		i.Execute(stmt.Statement)
+		if stmt.IncrementExpr != nil {
+			i.Evaluate(stmt.IncrementExpr)
+		}
 	}
 }

@@ -141,9 +141,35 @@ func (stmt BlockStmt) Print() string {
 }
 
 func (stmt IfStmt) Print() string {
-	return ""
+	var buffer bytes.Buffer
+
+	buffer.WriteString(" (")
+	buffer.WriteString("if ")
+	buffer.WriteString(stmt.ConditionExpr.Print())
+	buffer.WriteString(" then ")
+	buffer.WriteString(stmt.IfStatement.Print())
+	if stmt.ElseStatement != nil {
+		buffer.WriteString(" else ")
+		buffer.WriteString(stmt.ElseStatement.Print())
+	}
+	buffer.WriteString(") ")
+
+	return buffer.String()
 }
 
 func (stmt WhileStmt) Print() string {
+	var buffer bytes.Buffer
+
+	buffer.WriteString(" (")
+	buffer.WriteString("while ")
+	buffer.WriteString(stmt.ConditionExpr.Print())
+	buffer.WriteString(" do ")
+	buffer.WriteString(stmt.Statement.Print())
+	buffer.WriteString(") ")
+
+	return buffer.String()
+}
+
+func (stmt ForStmt) Print() string {
 	return ""
 }

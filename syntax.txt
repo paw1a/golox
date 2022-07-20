@@ -3,11 +3,13 @@ program: declaration*
 declaration: varDeclaration | statement
 varDeclaration: "var" IDENTIFIER ("=" expression)? ";"
 
-statement: printStatement | blockStatement | ifStatement | whileStatement
+statement: expressionStatement | printStatement | blockStatement | ifStatement | whileStatement | forStatement
+expressionStatement: expression ";"
 printStatement: "print" expression ";"
 blockStatement: "{" declaration* "}"
 ifStatement: "if" "(" expression ")" statement ("else" statement)?
 whileStatement: "while" "(" expression ")" statement
+forStatement: "for" "(" (varDeclaration | expressionStatement | ";") expression? ";" expression ")" statement
 
 expression: comma
 comma: comma "," assignment | assignment

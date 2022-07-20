@@ -68,9 +68,51 @@ func (p *Parser) statement() ast.Stmt {
 	case p.match(lexing.While):
 		p.advance()
 		return p.whileStatement()
+	case p.match(lexing.For):
+		p.advance()
+		return p.forStatement()
 	}
 
 	return p.expressionStatement()
+}
+
+func (p *Parser) forStatement() ast.Stmt {
+	p.requireToken(lexing.LeftParen, "for statement expect '('")
+
+	var initializerStmt ast.Stmt
+	switch {
+	case p.match(lexing.Var):
+		p.advance()
+		initializerStmt = p.varDeclaration()
+	case p.match(lexing.Semicolon):
+		p.advance()
+	default:
+		initializerStmt = p.expressionStatement()
+	}
+
+	var conditionExpr ast.Expr
+	if !p.match(lexing.Semicolon) {
+		conditionExpr = p.expression()
+	} else {
+		conditionExpr = ast.LiteralExpr{LiteralValue: true}
+	}
+	p.requireToken(lexing.Semicolon,
+		"for statement expect ';' between condition and increment expressions")
+
+	var incrementExpr ast.Expr
+	if !p.match(lexing.RightParen) {
+		incrementExpr = p.expression()
+	}
+	p.requireToken(lexing.RightParen, "for statement expect ')'")
+
+	statement := p.statement()
+
+	return ast.ForStmt{
+		InitializerStmt: initializerStmt,
+		ConditionExpr:   conditionExpr,
+		IncrementExpr:   incrementExpr,
+		Statement:       statement,
+	}
 }
 
 func (p *Parser) whileStatement() ast.Stmt {
