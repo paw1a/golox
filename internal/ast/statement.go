@@ -31,11 +31,6 @@ type IfStmt struct {
 	ElseStatement Stmt
 }
 
-type WhileStmt struct {
-	ConditionExpr Expr
-	Statement     Stmt
-}
-
 type ForStmt struct {
 	InitializerStmt Stmt
 	ConditionExpr   Expr

@@ -157,19 +157,6 @@ func (stmt IfStmt) Print() string {
 	return buffer.String()
 }
 
-func (stmt WhileStmt) Print() string {
-	var buffer bytes.Buffer
-
-	buffer.WriteString(" (")
-	buffer.WriteString("while ")
-	buffer.WriteString(stmt.ConditionExpr.Print())
-	buffer.WriteString(" do ")
-	buffer.WriteString(stmt.Statement.Print())
-	buffer.WriteString(") ")
-
-	return buffer.String()
-}
-
 func (stmt ForStmt) Print() string {
 	return ""
 }

@@ -121,7 +121,7 @@ func (p *Parser) whileStatement() ast.Stmt {
 	p.requireToken(lexing.RightParen, "while statement expect ')' after condition")
 	statement := p.statement()
 
-	return ast.WhileStmt{
+	return ast.ForStmt{
 		ConditionExpr: conditionExpr,
 		Statement:     statement,
 	}
