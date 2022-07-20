@@ -37,3 +37,9 @@ type ForStmt struct {
 	IncrementExpr   Expr
 	Statement       Stmt
 }
+
+type BreakStmt struct {
+}
+
+type ContinueStmt struct {
+}

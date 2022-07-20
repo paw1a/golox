@@ -160,3 +160,11 @@ func (stmt IfStmt) Print() string {
 func (stmt ForStmt) Print() string {
 	return ""
 }
+
+func (stmt BreakStmt) Print() string {
+	return ""
+}
+
+func (stmt ContinueStmt) Print() string {
+	return ""
+}

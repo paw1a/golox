@@ -6,7 +6,7 @@ import (
 	"github.com/paw1a/golox/internal/lexing"
 )
 
-func (i Interpreter) Execute(stmt ast.Stmt) {
+func (i *Interpreter) Execute(stmt ast.Stmt) {
 	switch stmt.(type) {
 	case ast.ExpressionStmt:
 		i.executeExprStmt(stmt.(ast.ExpressionStmt))
@@ -20,21 +20,25 @@ func (i Interpreter) Execute(stmt ast.Stmt) {
 		i.executeIfStmt(stmt.(ast.IfStmt))
 	case ast.ForStmt:
 		i.executeForStmt(stmt.(ast.ForStmt))
+	case ast.BreakStmt:
+		i.executeBreakStmt()
+	case ast.ContinueStmt:
+		i.executeContinueStmt()
 	default:
 		runtimeError(lexing.Token{}, "invalid ast type")
 	}
 }
 
-func (i Interpreter) executeExprStmt(stmt ast.ExpressionStmt) {
+func (i *Interpreter) executeExprStmt(stmt ast.ExpressionStmt) {
 	i.Evaluate(stmt.Expr)
 }
 
-func (i Interpreter) executePrintStmt(stmt ast.PrintStmt) {
+func (i *Interpreter) executePrintStmt(stmt ast.PrintStmt) {
 	value := i.Evaluate(stmt.Expr)
 	fmt.Printf("%v\n", value)
 }
 
-func (i Interpreter) executeVarDeclarationStmt(stmt ast.VarDeclarationStmt) {
+func (i *Interpreter) executeVarDeclarationStmt(stmt ast.VarDeclarationStmt) {
 	var value interface{}
 	if stmt.Initializer != nil {
 		value = i.Evaluate(stmt.Initializer)
@@ -43,7 +47,7 @@ func (i Interpreter) executeVarDeclarationStmt(stmt ast.VarDeclarationStmt) {
 	i.env.define(stmt.Name.Lexeme, value)
 }
 
-func (i Interpreter) executeBlockStmt(blockStmt ast.BlockStmt) {
+func (i *Interpreter) executeBlockStmt(blockStmt ast.BlockStmt) {
 	enclosingEnv := i.env
 	i.env = NewEnvironment(enclosingEnv)
 	defer func() {
@@ -52,10 +56,13 @@ func (i Interpreter) executeBlockStmt(blockStmt ast.BlockStmt) {
 
 	for _, stmt := range blockStmt.Stmts {
 		i.Execute(stmt)
+		if i.breakFlag || i.continueFlag {
+			break
+		}
 	}
 }
 
-func (i Interpreter) executeIfStmt(stmt ast.IfStmt) {
+func (i *Interpreter) executeIfStmt(stmt ast.IfStmt) {
 	conditionValue := i.Evaluate(stmt.ConditionExpr)
 
 	if isTruthy(conditionValue) {
@@ -68,7 +75,7 @@ func (i Interpreter) executeIfStmt(stmt ast.IfStmt) {
 	}
 }
 
-func (i Interpreter) executeForStmt(stmt ast.ForStmt) {
+func (i *Interpreter) executeForStmt(stmt ast.ForStmt) {
 	enclosingEnv := i.env
 	i.env = NewEnvironment(enclosingEnv)
 	defer func() {
@@ -81,8 +88,24 @@ func (i Interpreter) executeForStmt(stmt ast.ForStmt) {
 
 	for isTruthy(i.Evaluate(stmt.ConditionExpr)) {
 		i.Execute(stmt.Statement)
+		if i.breakFlag {
+			i.breakFlag = false
+			break
+		}
+		if i.continueFlag {
+			i.continueFlag = false
+		}
+
 		if stmt.IncrementExpr != nil {
 			i.Evaluate(stmt.IncrementExpr)
 		}
 	}
+}
+
+func (i *Interpreter) executeBreakStmt() {
+	i.breakFlag = true
+}
+
+func (i *Interpreter) executeContinueStmt() {
+	i.continueFlag = true
 }

@@ -6,7 +6,9 @@ import (
 )
 
 type Interpreter struct {
-	env *Environment
+	env          *Environment
+	breakFlag    bool
+	continueFlag bool
 }
 
 func runtimeError(token lexing.Token, message string) {

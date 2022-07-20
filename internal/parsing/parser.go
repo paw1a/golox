@@ -15,6 +15,8 @@ type Parser struct {
 
 	Errors []error
 	lines  []string
+
+	isLoopScope bool
 }
 
 func (p *Parser) Parse() []ast.Stmt {
@@ -71,9 +73,33 @@ func (p *Parser) statement() ast.Stmt {
 	case p.match(lexing.For):
 		p.advance()
 		return p.forStatement()
+	case p.match(lexing.Break):
+		if p.isLoopScope {
+			p.advance()
+			return p.breakStatement()
+		} else {
+			p.parseError(p.peek(), "break statement not within loop")
+		}
+	case p.match(lexing.Continue):
+		if p.isLoopScope {
+			p.advance()
+			return p.continueStatement()
+		} else {
+			p.parseError(p.peek(), "continue statement not within loop")
+		}
 	}
 
 	return p.expressionStatement()
+}
+
+func (p *Parser) breakStatement() ast.Stmt {
+	p.requireToken(lexing.Semicolon, "expect ';' after break statement")
+	return ast.BreakStmt{}
+}
+
+func (p *Parser) continueStatement() ast.Stmt {
+	p.requireToken(lexing.Semicolon, "expect ';' after continue statement")
+	return ast.ContinueStmt{}
 }
 
 func (p *Parser) forStatement() ast.Stmt {
@@ -105,6 +131,14 @@ func (p *Parser) forStatement() ast.Stmt {
 	}
 	p.requireToken(lexing.RightParen, "for statement expect ')'")
 
+	innerLoop := p.isLoopScope
+	p.isLoopScope = true
+	defer func() {
+		if !innerLoop {
+			p.isLoopScope = false
+		}
+	}()
+
 	statement := p.statement()
 
 	return ast.ForStmt{
@@ -119,6 +153,15 @@ func (p *Parser) whileStatement() ast.Stmt {
 	p.requireToken(lexing.LeftParen, "while statement expect '(' before condition")
 	conditionExpr := p.expression()
 	p.requireToken(lexing.RightParen, "while statement expect ')' after condition")
+
+	innerLoop := p.isLoopScope
+	p.isLoopScope = true
+	defer func() {
+		if !innerLoop {
+			p.isLoopScope = false
+		}
+	}()
+
 	statement := p.statement()
 
 	return ast.ForStmt{

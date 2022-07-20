@@ -51,6 +51,8 @@ const (
 	True
 	Var
 	While
+	Break
+	Continue
 )
 
 type Token struct {
