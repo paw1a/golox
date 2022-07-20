@@ -10,6 +10,8 @@ blockStatement: "{" declaration* "}"
 ifStatement: "if" "(" expression ")" statement ("else" statement)?
 whileStatement: "while" "(" expression ")" statement
 forStatement: "for" "(" (varDeclaration | expressionStatement | ";") expression? ";" expression ")" statement
+breakStatement: "break" ";"
+continueStatement: "continue" ";"
 
 expression: comma
 comma: comma "," assignment | assignment
