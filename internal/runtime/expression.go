@@ -26,6 +26,8 @@ func (i *Interpreter) Evaluate(expr ast.Expr) interface{} {
 		return i.evaluateLogicalExpr(expr.(ast.LogicalExpr))
 	case ast.CallExpr:
 		return i.evaluateCallExpr(expr.(ast.CallExpr))
+	case ast.LambdaExpr:
+		return i.evaluateLambdaExpr(expr.(ast.LambdaExpr))
 	default:
 		runtimeError(lexing.Token{}, "invalid ast type")
 	}
@@ -209,6 +211,13 @@ func (i *Interpreter) evaluateCallExpr(expr ast.CallExpr) interface{} {
 
 	runtimeError(expr.Paren, "invalid object to call")
 	return nil
+}
+
+func (i *Interpreter) evaluateLambdaExpr(expr ast.LambdaExpr) interface{} {
+	return LambdaFunction{
+		LambdaExpr: expr,
+		Closure:    i.env,
+	}
 }
 
 func requireNumberOperand(operator lexing.Token, operand interface{}) {

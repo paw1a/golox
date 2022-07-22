@@ -281,6 +281,43 @@ func (p *Parser) expression() ast.Expr {
 	return p.comma()
 }
 
+func (p *Parser) lambda() ast.Expr {
+	p.requireToken(lexing.LeftParen, "lambda declaration expect '('")
+
+	parameters := make([]lexing.Token, 0)
+	if !p.match(lexing.RightParen) {
+		parameters = append(parameters, p.requireToken(lexing.Identifier,
+			"lambda declaration expect identifier as param name"))
+		for p.match(lexing.Comma) {
+			p.advance()
+			if len(parameters) >= 255 {
+				p.parseError(p.peek(), "declared more than 255 parameters")
+				break
+			}
+			parameters = append(parameters, p.requireToken(lexing.Identifier,
+				"lambda declaration expect identifier as param name"))
+		}
+	}
+	p.requireToken(lexing.RightParen, "lambda declaration expect ')'")
+
+	p.requireToken(lexing.LeftBrace, "expect '{' before lambda body")
+
+	innerFunc := p.isFuncScope
+	p.isFuncScope = true
+	defer func() {
+		if !innerFunc {
+			p.isFuncScope = false
+		}
+	}()
+
+	statement := p.blockStatement()
+
+	return ast.LambdaExpr{
+		Params:    parameters,
+		Statement: statement.(ast.BlockStmt),
+	}
+}
+
 func (p *Parser) comma() ast.Expr {
 	var expr ast.Expr
 
@@ -299,6 +336,11 @@ func (p *Parser) comma() ast.Expr {
 }
 
 func (p *Parser) assignment() ast.Expr {
+	if p.match(lexing.Fun) {
+		p.advance()
+		return p.lambda()
+	}
+
 	expr := p.logicalOr()
 
 	if p.match(lexing.Equal) {

@@ -51,3 +51,8 @@ type CallExpr struct {
 	Paren     lexing.Token
 	Arguments []Expr
 }
+
+type LambdaExpr struct {
+	Params    []lexing.Token
+	Statement BlockStmt
+}

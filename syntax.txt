@@ -16,7 +16,8 @@ forStatement: "for" "(" (varDeclaration | expressionStatement | ";") expression?
 breakStatement: "break" ";"
 continueStatement: "continue" ";"
 
-expression: comma
+expression: comma | lambda
+lambda: "fun" "(" parameters? ")" blockStatement
 comma: comma "," assignment | assignment
 assignment: IDENTIFIER "=" assignment | logicalOr
 logicalOr: logicalAnd ("or" logicalAnd)*
