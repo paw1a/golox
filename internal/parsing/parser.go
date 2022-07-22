@@ -379,7 +379,41 @@ func (p *Parser) unary() ast.Expr {
 		}
 	}
 
-	return p.primary()
+	return p.call()
+}
+
+func (p *Parser) call() ast.Expr {
+	expr := p.primary()
+
+	for p.match(lexing.LeftParen) {
+		p.advance()
+		expr = p.callArguments(expr)
+	}
+
+	return expr
+}
+
+func (p *Parser) callArguments(callee ast.Expr) ast.Expr {
+	arguments := make([]ast.Expr, 0)
+
+	if !p.match(lexing.RightParen) {
+		arguments = append(arguments, p.expression())
+		for p.match(lexing.Comma) {
+			p.advance()
+			if len(arguments) >= 255 {
+				p.parseError(p.peek(), "passed more than 255 arguments")
+				break
+			}
+			arguments = append(arguments, p.expression())
+		}
+	}
+
+	paren := p.requireToken(lexing.RightParen, "function call expect ')'")
+	return ast.CallExpr{
+		Callee:    callee,
+		Paren:     paren,
+		Arguments: arguments,
+	}
 }
 
 func (p *Parser) primary() ast.Expr {

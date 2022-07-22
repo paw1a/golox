@@ -7,6 +7,7 @@ import (
 
 type Interpreter struct {
 	env          *Environment
+	global       *Environment
 	breakFlag    bool
 	continueFlag bool
 }
@@ -55,5 +56,10 @@ func isString(value interface{}) bool {
 }
 
 func NewInterpreter() *Interpreter {
-	return &Interpreter{env: NewEnvironment(nil)}
+	global := NewEnvironment(nil)
+	global.define("clock", ClockFunc{})
+	return &Interpreter{
+		env:    global,
+		global: global,
+	}
 }

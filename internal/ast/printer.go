@@ -89,6 +89,10 @@ func (expr LogicalExpr) Print() string {
 	return buffer.String()
 }
 
+func (expr CallExpr) Print() string {
+	return ""
+}
+
 func (stmt ExpressionStmt) Print() string {
 	var buffer bytes.Buffer
 

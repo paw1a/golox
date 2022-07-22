@@ -45,3 +45,9 @@ type LogicalExpr struct {
 	Operator  lexing.Token
 	RightExpr Expr
 }
+
+type CallExpr struct {
+	Callee    Expr
+	Paren     lexing.Token
+	Arguments []Expr
+}

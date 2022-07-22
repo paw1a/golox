@@ -1,11 +1,12 @@
 package runtime
 
 import (
+	"fmt"
 	"github.com/paw1a/golox/internal/ast"
 	"github.com/paw1a/golox/internal/lexing"
 )
 
-func (i Interpreter) Evaluate(expr ast.Expr) interface{} {
+func (i *Interpreter) Evaluate(expr ast.Expr) interface{} {
 	switch expr.(type) {
 	case ast.BinaryExpr:
 		return i.evaluateBinaryExpr(expr.(ast.BinaryExpr))
@@ -23,6 +24,8 @@ func (i Interpreter) Evaluate(expr ast.Expr) interface{} {
 		return i.evaluateTernaryExpr(expr.(ast.TernaryExpr))
 	case ast.LogicalExpr:
 		return i.evaluateLogicalExpr(expr.(ast.LogicalExpr))
+	case ast.CallExpr:
+		return i.evaluateCallExpr(expr.(ast.CallExpr))
 	default:
 		runtimeError(lexing.Token{}, "invalid ast type")
 	}
@@ -30,7 +33,7 @@ func (i Interpreter) Evaluate(expr ast.Expr) interface{} {
 	return nil
 }
 
-func (i Interpreter) evaluateBinaryExpr(expr ast.BinaryExpr) interface{} {
+func (i *Interpreter) evaluateBinaryExpr(expr ast.BinaryExpr) interface{} {
 	leftValue := i.Evaluate(expr.LeftExpr)
 	rightValue := i.Evaluate(expr.RightExpr)
 
@@ -130,7 +133,7 @@ func (i Interpreter) evaluateBinaryExpr(expr ast.BinaryExpr) interface{} {
 	return nil
 }
 
-func (i Interpreter) evaluateUnaryExpr(expr ast.UnaryExpr) interface{} {
+func (i *Interpreter) evaluateUnaryExpr(expr ast.UnaryExpr) interface{} {
 	value := i.Evaluate(expr.RightExpr)
 
 	switch expr.Operator.TokenType {
@@ -143,25 +146,25 @@ func (i Interpreter) evaluateUnaryExpr(expr ast.UnaryExpr) interface{} {
 	return nil
 }
 
-func (i Interpreter) evaluateLiteralExpr(expr ast.LiteralExpr) interface{} {
+func (i *Interpreter) evaluateLiteralExpr(expr ast.LiteralExpr) interface{} {
 	return expr.LiteralValue
 }
 
-func (i Interpreter) evaluateGroupingExpr(expr ast.GroupingExpr) interface{} {
+func (i *Interpreter) evaluateGroupingExpr(expr ast.GroupingExpr) interface{} {
 	return i.Evaluate(expr.Expr)
 }
 
-func (i Interpreter) evaluateVariableExpr(expr ast.VariableExpr) interface{} {
+func (i *Interpreter) evaluateVariableExpr(expr ast.VariableExpr) interface{} {
 	return i.env.get(expr.Name)
 }
 
-func (i Interpreter) evaluateAssignExpr(expr ast.AssignExpr) interface{} {
+func (i *Interpreter) evaluateAssignExpr(expr ast.AssignExpr) interface{} {
 	value := i.Evaluate(expr.Initializer)
 	i.env.assign(expr.Name, value)
 	return value
 }
 
-func (i Interpreter) evaluateTernaryExpr(expr ast.TernaryExpr) interface{} {
+func (i *Interpreter) evaluateTernaryExpr(expr ast.TernaryExpr) interface{} {
 	conditionValue := i.Evaluate(expr.Condition)
 
 	var value interface{}
@@ -174,7 +177,7 @@ func (i Interpreter) evaluateTernaryExpr(expr ast.TernaryExpr) interface{} {
 	return value
 }
 
-func (i Interpreter) evaluateLogicalExpr(expr ast.LogicalExpr) interface{} {
+func (i *Interpreter) evaluateLogicalExpr(expr ast.LogicalExpr) interface{} {
 	leftValue := i.Evaluate(expr.LeftExpr)
 
 	if expr.Operator.TokenType == lexing.Or && isTruthy(leftValue) ||
@@ -183,6 +186,29 @@ func (i Interpreter) evaluateLogicalExpr(expr ast.LogicalExpr) interface{} {
 	}
 
 	return i.Evaluate(expr.RightExpr)
+}
+
+func (i *Interpreter) evaluateCallExpr(expr ast.CallExpr) interface{} {
+	calleeValue := i.Evaluate(expr.Callee)
+
+	argumentValues := make([]interface{}, 0)
+	for _, argumentExpr := range expr.Arguments {
+		argumentValues = append(argumentValues, i.Evaluate(argumentExpr))
+	}
+
+	switch calleeValue.(type) {
+	case Caller:
+		function := calleeValue.(Caller)
+		if function.ParametersCount() != len(argumentValues) {
+			runtimeError(expr.Paren,
+				fmt.Sprintf("expect %d arguments, got %d",
+					function.ParametersCount(), len(argumentValues)))
+		}
+		return function.Call(i, argumentValues)
+	}
+
+	runtimeError(expr.Paren, "invalid object to call")
+	return nil
 }
 
 func requireNumberOperand(operator lexing.Token, operand interface{}) {
