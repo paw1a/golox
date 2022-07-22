@@ -7,3 +7,7 @@ fun thrice(fn) {
 thrice(fun (a) {
     print a;
 });
+
+(fun(g) {
+    print g;
+})(5);
