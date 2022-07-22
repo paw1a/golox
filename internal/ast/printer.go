@@ -172,3 +172,7 @@ func (stmt BreakStmt) Print() string {
 func (stmt ContinueStmt) Print() string {
 	return ""
 }
+
+func (stmt FunDeclarationStmt) Print() string {
+	return ""
+}

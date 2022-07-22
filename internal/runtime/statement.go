@@ -24,6 +24,8 @@ func (i *Interpreter) Execute(stmt ast.Stmt) {
 		i.executeBreakStmt()
 	case ast.ContinueStmt:
 		i.executeContinueStmt()
+	case ast.FunDeclarationStmt:
+		i.executeFunDeclarationStmt(stmt.(ast.FunDeclarationStmt))
 	default:
 		runtimeError(lexing.Token{}, "invalid ast type")
 	}
@@ -45,6 +47,11 @@ func (i *Interpreter) executeVarDeclarationStmt(stmt ast.VarDeclarationStmt) {
 	}
 
 	i.env.define(stmt.Name.Lexeme, value)
+}
+
+func (i *Interpreter) executeFunDeclarationStmt(stmt ast.FunDeclarationStmt) {
+	function := Function{Declaration: stmt}
+	i.global.define(stmt.Name.Lexeme, function)
 }
 
 func (i *Interpreter) executeBlockStmt(blockStmt ast.BlockStmt) {

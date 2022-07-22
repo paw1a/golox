@@ -43,3 +43,9 @@ type BreakStmt struct {
 
 type ContinueStmt struct {
 }
+
+type FunDeclarationStmt struct {
+	Name      lexing.Token
+	Params    []lexing.Token
+	Statement BlockStmt
+}

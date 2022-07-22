@@ -1,0 +1,13 @@
+fun f(a, b) {
+    print a + b;
+}
+
+f(4, 5);
+f("hello ", "world");
+
+fun count(n) {
+  if (n > 1) count(n - 1);
+  print n;
+}
+
+count(3);

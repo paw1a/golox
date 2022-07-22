@@ -37,6 +37,11 @@ func (p *Parser) declaration() ast.Stmt {
 		return p.varDeclaration()
 	}
 
+	if p.match(lexing.Fun) {
+		p.advance()
+		return p.funDeclaration()
+	}
+
 	return p.statement()
 }
 
@@ -53,6 +58,36 @@ func (p *Parser) varDeclaration() ast.Stmt {
 	return ast.VarDeclarationStmt{
 		Name:        varName,
 		Initializer: initializer,
+	}
+}
+
+func (p *Parser) funDeclaration() ast.Stmt {
+	funcName := p.requireToken(lexing.Identifier, "function name expected")
+	p.requireToken(lexing.LeftParen, "function declaration expect '('")
+
+	parameters := make([]lexing.Token, 0)
+	if !p.match(lexing.RightParen) {
+		parameters = append(parameters, p.requireToken(lexing.Identifier,
+			"function declaration expect identifier as param name"))
+		for p.match(lexing.Comma) {
+			p.advance()
+			if len(parameters) >= 255 {
+				p.parseError(p.peek(), "declared more than 255 parameters")
+				break
+			}
+			parameters = append(parameters, p.requireToken(lexing.Identifier,
+				"function declaration expect identifier as param name"))
+		}
+	}
+	p.requireToken(lexing.RightParen, "function declaration expect ')'")
+
+	p.requireToken(lexing.LeftBrace, "expect '{' before function body")
+	statement := p.blockStatement()
+
+	return ast.FunDeclarationStmt{
+		Name:      funcName,
+		Params:    parameters,
+		Statement: statement.(ast.BlockStmt),
 	}
 }
 
@@ -397,14 +432,14 @@ func (p *Parser) callArguments(callee ast.Expr) ast.Expr {
 	arguments := make([]ast.Expr, 0)
 
 	if !p.match(lexing.RightParen) {
-		arguments = append(arguments, p.expression())
+		arguments = append(arguments, p.assignment())
 		for p.match(lexing.Comma) {
 			p.advance()
 			if len(arguments) >= 255 {
 				p.parseError(p.peek(), "passed more than 255 arguments")
 				break
 			}
-			arguments = append(arguments, p.expression())
+			arguments = append(arguments, p.assignment())
 		}
 	}
 

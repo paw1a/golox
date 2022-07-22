@@ -1,7 +1,10 @@
 program: declaration*
 
-declaration: varDeclaration | statement
+declaration: varDeclaration | funDeclaration | statement
 varDeclaration: "var" IDENTIFIER ("=" expression)? ";"
+funDeclaration: "fun" function
+function: IDENTIFIER "(" parameters? ")" blockStatement
+parameters: IDENTIFIER ("," IDENTIFIER)*
 
 statement: expressionStatement | printStatement | blockStatement | ifStatement | whileStatement | forStatement
 expressionStatement: expression ";"
