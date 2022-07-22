@@ -1,6 +1,8 @@
 package runtime
 
-import "github.com/paw1a/golox/internal/ast"
+import (
+	"github.com/paw1a/golox/internal/ast"
+)
 
 type Caller interface {
 	Call(interpreter *Interpreter, arguments []interface{}) interface{}
@@ -24,6 +26,11 @@ func (f Function) Call(interpreter *Interpreter, arguments []interface{}) interf
 	}()
 
 	interpreter.executeBlockStmt(f.Declaration.Statement)
+	if interpreter.returnContext.returnFlag {
+		interpreter.returnContext.returnFlag = false
+		return interpreter.returnContext.returnValue
+	}
+
 	return nil
 }
 

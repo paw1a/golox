@@ -6,10 +6,20 @@ import (
 )
 
 type Interpreter struct {
-	env          *Environment
-	global       *Environment
+	env           *Environment
+	global        *Environment
+	loopContext   loopContext
+	returnContext returnContext
+}
+
+type loopContext struct {
 	breakFlag    bool
 	continueFlag bool
+}
+
+type returnContext struct {
+	returnFlag  bool
+	returnValue interface{}
 }
 
 func runtimeError(token lexing.Token, message string) {

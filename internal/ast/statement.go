@@ -49,3 +49,8 @@ type FunDeclarationStmt struct {
 	Params    []lexing.Token
 	Statement BlockStmt
 }
+
+type ReturnStmt struct {
+	ReturnToken lexing.Token
+	Expr        Expr
+}

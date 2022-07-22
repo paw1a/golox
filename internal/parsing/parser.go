@@ -17,6 +17,7 @@ type Parser struct {
 	lines  []string
 
 	isLoopScope bool
+	isFuncScope bool
 }
 
 func (p *Parser) Parse() []ast.Stmt {
@@ -82,6 +83,15 @@ func (p *Parser) funDeclaration() ast.Stmt {
 	p.requireToken(lexing.RightParen, "function declaration expect ')'")
 
 	p.requireToken(lexing.LeftBrace, "expect '{' before function body")
+
+	innerFunc := p.isFuncScope
+	p.isFuncScope = true
+	defer func() {
+		if !innerFunc {
+			p.isFuncScope = false
+		}
+	}()
+
 	statement := p.blockStatement()
 
 	return ast.FunDeclarationStmt{
@@ -122,9 +132,28 @@ func (p *Parser) statement() ast.Stmt {
 		} else {
 			p.parseError(p.peek(), "continue statement not within loop")
 		}
+	case p.match(lexing.Return):
+		if p.isFuncScope {
+			return p.returnStatement(p.advance())
+		} else {
+			p.parseError(p.peek(), "return statement not within func body")
+		}
 	}
 
 	return p.expressionStatement()
+}
+
+func (p *Parser) returnStatement(returnToken lexing.Token) ast.Stmt {
+	var returnExpr ast.Expr
+	if !p.match(lexing.Semicolon) {
+		returnExpr = p.expression()
+	}
+	p.requireToken(lexing.Semicolon, "expect ';' after return keyword")
+
+	return ast.ReturnStmt{
+		ReturnToken: returnToken,
+		Expr:        returnExpr,
+	}
 }
 
 func (p *Parser) breakStatement() ast.Stmt {

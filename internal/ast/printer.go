@@ -176,3 +176,7 @@ func (stmt ContinueStmt) Print() string {
 func (stmt FunDeclarationStmt) Print() string {
 	return ""
 }
+
+func (stmt ReturnStmt) Print() string {
+	return ""
+}
