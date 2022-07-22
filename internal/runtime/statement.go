@@ -52,7 +52,10 @@ func (i *Interpreter) executeVarDeclarationStmt(stmt ast.VarDeclarationStmt) {
 }
 
 func (i *Interpreter) executeFunDeclarationStmt(stmt ast.FunDeclarationStmt) {
-	function := Function{Declaration: stmt}
+	function := Function{
+		Declaration: stmt,
+		Closure:     i.env,
+	}
 	i.global.define(stmt.Name.Lexeme, function)
 }
 

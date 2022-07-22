@@ -11,10 +11,11 @@ type Caller interface {
 
 type Function struct {
 	Declaration ast.FunDeclarationStmt
+	Closure     *Environment
 }
 
 func (f Function) Call(interpreter *Interpreter, arguments []interface{}) interface{} {
-	innerScope := NewEnvironment(interpreter.global)
+	innerScope := NewEnvironment(f.Closure)
 	for i, argument := range arguments {
 		innerScope.define(f.Declaration.Params[i].Lexeme, argument)
 	}
