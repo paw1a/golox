@@ -157,12 +157,17 @@ func (i *Interpreter) evaluateGroupingExpr(expr ast.GroupingExpr) interface{} {
 }
 
 func (i *Interpreter) evaluateVariableExpr(expr ast.VariableExpr) interface{} {
-	return i.env.get(expr.Name)
+	return i.lookUpVariable(expr.Name, expr)
 }
 
 func (i *Interpreter) evaluateAssignExpr(expr ast.AssignExpr) interface{} {
 	value := i.Evaluate(expr.Initializer)
-	i.env.assign(expr.Name, value)
+	distance, ok := i.locals[expr]
+	if ok {
+		i.env.assignAt(distance, expr.Name, expr)
+	} else {
+		i.global.assign(expr.Name, value)
+	}
 	return value
 }
 

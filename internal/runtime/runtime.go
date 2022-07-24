@@ -2,12 +2,14 @@ package runtime
 
 import (
 	"fmt"
+	"github.com/paw1a/golox/internal/ast"
 	"github.com/paw1a/golox/internal/lexing"
 )
 
 type Interpreter struct {
 	env           *Environment
 	global        *Environment
+	locals        map[ast.Expr]int
 	loopContext   loopContext
 	returnContext returnContext
 }
@@ -20,6 +22,19 @@ type loopContext struct {
 type returnContext struct {
 	returnFlag  bool
 	returnValue interface{}
+}
+
+func (i *Interpreter) Resolve(expr ast.Expr, index int) {
+	i.locals[expr] = index
+}
+
+func (i *Interpreter) lookUpVariable(token lexing.Token, expr ast.Expr) interface{} {
+	distance, ok := i.locals[expr]
+	if ok {
+		return i.env.getAt(distance, token.Lexeme)
+	} else {
+		return i.global.get(token)
+	}
 }
 
 func runtimeError(token lexing.Token, message string) {

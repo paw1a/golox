@@ -56,7 +56,7 @@ func (i *Interpreter) executeFunDeclarationStmt(stmt ast.FunDeclarationStmt) {
 		Declaration: stmt,
 		Closure:     i.env,
 	}
-	i.global.define(stmt.Name.Lexeme, function)
+	i.env.define(stmt.Name.Lexeme, function)
 }
 
 func (i *Interpreter) executeBlockStmt(blockStmt ast.BlockStmt) {
