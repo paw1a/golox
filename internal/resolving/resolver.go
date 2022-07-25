@@ -37,7 +37,7 @@ func (r *Resolver) resolveLocal(expr ast.Expr, token lexing.Token) {
 	for i := r.scopes.Size() - 1; i >= 0; i-- {
 		scope, _ := r.scopes.Get(i)
 		if _, ok := scope[token.Lexeme]; ok {
-			r.interpreter.Resolve(expr, r.scopes.Size()-1-i)
+			r.interpreter.Resolve(expr, r.scopes.Size()-i-1)
 			return
 		}
 	}

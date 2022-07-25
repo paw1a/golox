@@ -49,11 +49,12 @@ func (r *Resolver) groupingExpr(expr ast.GroupingExpr) {
 }
 
 func (r *Resolver) variableExpr(expr ast.VariableExpr) {
-	if scope, ok := r.scopes.Peek(); ok && scope[expr.Name.Lexeme] {
-		r.resolveLocal(expr, expr.Name)
-	} else {
-		resolveError(expr.Name, "can't read local variable in its own initializer.")
+	if scope, ok := r.scopes.Peek(); ok {
+		if value, ok := scope[expr.Name.Lexeme]; ok && !value {
+			resolveError(expr.Name, "can't read local variable in its own initializer.")
+		}
 	}
+	r.resolveLocal(expr, expr.Name)
 }
 
 func (r *Resolver) assignExpr(expr ast.AssignExpr) {

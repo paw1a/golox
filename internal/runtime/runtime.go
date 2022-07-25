@@ -86,5 +86,6 @@ func NewInterpreter() *Interpreter {
 	return &Interpreter{
 		env:    global,
 		global: global,
+		locals: make(map[ast.Expr]int),
 	}
 }

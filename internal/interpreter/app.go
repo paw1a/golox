@@ -93,18 +93,18 @@ func run(source string) {
 	inter := runtime.NewInterpreter()
 
 	resolver := resolving.NewResolver(inter)
-	//defer runtimeRecoverFunc()
+	defer errorRecovery()
 	for _, stmt := range statements {
 		resolver.ResolveStmt(stmt)
 	}
 
-	defer runtimeRecoverFunc()
+	defer errorRecovery()
 	for _, stmt := range statements {
 		inter.Execute(stmt)
 	}
 }
 
-func runtimeRecoverFunc() {
+func errorRecovery() {
 	if err := recover(); err != nil {
 		fmt.Printf("%v\n", err)
 	}
