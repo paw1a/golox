@@ -11,6 +11,8 @@ const (
 	RightParen
 	LeftBrace
 	RightBrace
+	LeftBracket
+	RightBracket
 
 	Comma
 	Dot

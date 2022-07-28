@@ -93,6 +93,14 @@ func (expr CallExpr) Print() string {
 	return ""
 }
 
+func (expr ArrayExpr) Print() string {
+	return ""
+}
+
+func (expr IndexExpr) Print() string {
+	return ""
+}
+
 func (expr LambdaExpr) Print() string {
 	return ""
 }

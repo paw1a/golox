@@ -25,6 +25,10 @@ func (r *Resolver) ResolveExpr(expr ast.Expr) {
 		r.logicalExpr(expr.(ast.LogicalExpr))
 	case ast.CallExpr:
 		r.callExpr(expr.(ast.CallExpr))
+	case ast.ArrayExpr:
+		r.arrayExpr(expr.(ast.ArrayExpr))
+	case ast.IndexExpr:
+		r.arrayIndexExpr(expr.(ast.IndexExpr))
 	case ast.LambdaExpr:
 		r.lambdaExpr(expr.(ast.LambdaExpr))
 	default:
@@ -78,6 +82,17 @@ func (r *Resolver) callExpr(expr ast.CallExpr) {
 	for _, arg := range expr.Arguments {
 		r.ResolveExpr(arg)
 	}
+}
+
+func (r *Resolver) arrayExpr(expr ast.ArrayExpr) {
+	for _, elem := range expr.Elements {
+		r.ResolveExpr(elem)
+	}
+}
+
+func (r *Resolver) arrayIndexExpr(expr ast.IndexExpr) {
+	r.ResolveExpr(expr.Array)
+	r.ResolveExpr(expr.IndexExpr)
 }
 
 func (r *Resolver) lambdaExpr(expr ast.LambdaExpr) {

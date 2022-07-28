@@ -23,6 +23,9 @@ func (r *Resolver) endScope() {
 
 func (r *Resolver) declare(token lexing.Token) {
 	if scope, ok := r.scopes.Peek(); ok {
+		if _, ok := scope[token.Lexeme]; ok {
+			resolveError(token, "variable redeclaration in local scope")
+		}
 		scope[token.Lexeme] = false
 	}
 }
@@ -46,9 +49,9 @@ func (r *Resolver) resolveLocal(expr ast.Expr, token lexing.Token) {
 func resolveError(token lexing.Token, message string) {
 	var errorMessage string
 	if token.TokenType == lexing.Eof {
-		errorMessage = fmt.Sprintf("line %d | at end of input: %s", token.Line, message)
+		errorMessage = fmt.Sprintf("resolver: line %d | at end of input: %s", token.Line, message)
 	} else {
-		errorMessage = fmt.Sprintf("line %d | at '%s': %s", token.Line, token.Lexeme, message)
+		errorMessage = fmt.Sprintf("resolver: line %d | at '%s': %s", token.Line, token.Lexeme, message)
 	}
 	panic(errorMessage)
 }

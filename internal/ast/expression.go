@@ -52,6 +52,16 @@ type CallExpr struct {
 	Arguments []Expr
 }
 
+type ArrayExpr struct {
+	Elements []Expr
+}
+
+type IndexExpr struct {
+	Array     Expr
+	Bracket   lexing.Token
+	IndexExpr Expr
+}
+
 type LambdaExpr struct {
 	Params    []lexing.Token
 	Statement BlockStmt

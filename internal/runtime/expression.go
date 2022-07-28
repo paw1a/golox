@@ -26,6 +26,10 @@ func (i *Interpreter) Evaluate(expr ast.Expr) interface{} {
 		return i.evaluateLogicalExpr(expr.(ast.LogicalExpr))
 	case ast.CallExpr:
 		return i.evaluateCallExpr(expr.(ast.CallExpr))
+	case ast.IndexExpr:
+		return i.evaluateIndexExpr(expr.(ast.IndexExpr))
+	case ast.ArrayExpr:
+		return i.evaluateArrayExpr(expr.(ast.ArrayExpr))
 	case ast.LambdaExpr:
 		return i.evaluateLambdaExpr(expr.(ast.LambdaExpr))
 	default:
@@ -164,7 +168,7 @@ func (i *Interpreter) evaluateAssignExpr(expr ast.AssignExpr) interface{} {
 	value := i.Evaluate(expr.Initializer)
 	distance, ok := i.locals[expr]
 	if ok {
-		i.env.assignAt(distance, expr.Name, expr)
+		i.env.assignAt(distance, expr.Name, value)
 	} else {
 		i.global.assign(expr.Name, value)
 	}
@@ -216,6 +220,44 @@ func (i *Interpreter) evaluateCallExpr(expr ast.CallExpr) interface{} {
 
 	runtimeError(expr.Paren, "invalid object to call")
 	return nil
+}
+
+func (i *Interpreter) evaluateIndexExpr(expr ast.IndexExpr) interface{} {
+	arrayValue := i.Evaluate(expr.Array)
+
+	switch arrayValue.(type) {
+	case []interface{}:
+		array := arrayValue.([]interface{})
+
+		indexValue := i.Evaluate(expr.IndexExpr)
+		var index int
+		if isNumber(indexValue) {
+			index = int(indexValue.(float64))
+		} else {
+			runtimeError(expr.Bracket, "index must be integer number")
+		}
+
+		if index >= len(array) {
+			runtimeError(expr.Bracket,
+				fmt.Sprintf("index %d out of range in array with len %d", index, len(array)))
+		}
+
+		return array[index]
+	}
+
+	runtimeError(expr.Bracket, "invalid array object")
+	return nil
+}
+
+func (i *Interpreter) evaluateArrayExpr(expr ast.ArrayExpr) interface{} {
+	array := make([]interface{}, len(expr.Elements))
+
+	for index, elemExpr := range expr.Elements {
+		elemValue := i.Evaluate(elemExpr)
+		array[index] = elemValue
+	}
+
+	return array
 }
 
 func (i *Interpreter) evaluateLambdaExpr(expr ast.LambdaExpr) interface{} {

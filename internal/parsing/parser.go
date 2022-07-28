@@ -491,9 +491,20 @@ func (p *Parser) unary() ast.Expr {
 func (p *Parser) call() ast.Expr {
 	expr := p.primary()
 
-	for p.match(lexing.LeftParen) {
-		p.advance()
-		expr = p.callArguments(expr)
+	if p.match(lexing.LeftParen) {
+		for p.match(lexing.LeftParen) {
+			p.advance()
+			expr = p.callArguments(expr)
+		}
+		return expr
+	}
+
+	if p.match(lexing.LeftBracket) {
+		for p.match(lexing.LeftBracket) {
+			p.advance()
+			expr = p.arrayIndex(expr)
+		}
+		return expr
 	}
 
 	return expr
@@ -522,6 +533,16 @@ func (p *Parser) callArguments(callee ast.Expr) ast.Expr {
 	}
 }
 
+func (p *Parser) arrayIndex(array ast.Expr) ast.Expr {
+	indexExpr := p.expression()
+	bracket := p.requireToken(lexing.RightBracket, "array index expression expect ']'")
+	return ast.IndexExpr{
+		Array:     array,
+		Bracket:   bracket,
+		IndexExpr: indexExpr,
+	}
+}
+
 func (p *Parser) primary() ast.Expr {
 	switch {
 	case p.match(lexing.False):
@@ -542,12 +563,32 @@ func (p *Parser) primary() ast.Expr {
 		expr := p.expression()
 		p.requireToken(lexing.RightParen, "expect ')' token after expression")
 		return ast.GroupingExpr{Expr: expr}
+	case p.match(lexing.LeftBracket):
+		p.advance()
+		return p.arrayElements()
 	case p.match(lexing.Identifier):
 		return ast.VariableExpr{Name: p.advance()}
 	}
 
 	p.parseError(p.peek(), "expect expression")
 	return nil
+}
+
+func (p *Parser) arrayElements() ast.Expr {
+	elements := make([]ast.Expr, 0)
+
+	if !p.match(lexing.RightBracket) {
+		elements = append(elements, p.assignment())
+		for p.match(lexing.Comma) {
+			p.advance()
+			elements = append(elements, p.assignment())
+		}
+	}
+
+	p.requireToken(lexing.RightBracket, "array initializer expect ']'")
+	return ast.ArrayExpr{
+		Elements: elements,
+	}
 }
 
 func (p *Parser) requireToken(tokenType lexing.TokenType, message string) lexing.Token {

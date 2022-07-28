@@ -27,7 +27,9 @@ comparison: term (("<" | ">" | "<=" | ">=") term)*
 term: factor (("-" | "+") factor)*
 factor: unary (("*" | "/") unary)*
 unary: ("-" | "!") unary | call
-call: primary ("(" arguments? ")")*
+call: primary ("(" arguments? ")")* | array
+array: primary "[" expression "]"
 arguments: expression ("," expression)*
 
-primary: STRING | NUMBER | "true" | "false" | "nil" | IDENTIFIER | "(" expression ")"
+primary: STRING | NUMBER | "true" | "false" | "nil" | IDENTIFIER | "(" expression ")"  | "[" arrayElements? "]"
+arrayElements: primary ("," primary)*
