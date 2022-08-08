@@ -1,5 +1,13 @@
 var array = [10, 20, 30, 40, 50];
 
-for (var i = 0; i < 5; i = i + 1) {
+for (var i = 0; i < len(array); i = i + 1) {
     print array[i];
 }
+
+var dynamic = [];
+
+for (var i = 0; i < 3; i = i + 1) {
+    dynamic = append(dynamic, i * 10);
+}
+
+print dynamic;

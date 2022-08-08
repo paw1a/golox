@@ -83,6 +83,9 @@ func isString(value interface{}) bool {
 func NewInterpreter() *Interpreter {
 	global := NewEnvironment(nil)
 	global.define("clock", ClockFunc{})
+	global.define("exit", ExitFunc{})
+	global.define("append", AppendFunc{})
+	global.define("len", LenFunc{})
 	return &Interpreter{
 		env:    global,
 		global: global,
