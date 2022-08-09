@@ -168,9 +168,20 @@ func (i *Interpreter) evaluateAssignExpr(expr ast.AssignExpr) interface{} {
 	value := i.Evaluate(expr.Initializer)
 	switch expr.Variable.(type) {
 	case ast.IndexExpr:
-		array := i.Evaluate(expr.Variable.(ast.IndexExpr).Array)
-		index := i.Evaluate(expr.Variable.(ast.IndexExpr).IndexExpr)
-		array.([]interface{})[int(index.(float64))] = value
+		array := i.Evaluate(expr.Variable.(ast.IndexExpr).Array).([]interface{})
+		indexValue := i.Evaluate(expr.Variable.(ast.IndexExpr).IndexExpr)
+		var index int
+		if isNumber(indexValue) {
+			index = int(indexValue.(float64))
+		} else {
+			runtimeError(expr.Variable.(ast.IndexExpr).Bracket, "index must be integer number")
+		}
+
+		if index >= len(array) {
+			runtimeError(expr.Variable.(ast.IndexExpr).Bracket,
+				fmt.Sprintf("index %d out of range in array with len %d", index, len(array)))
+		}
+		array[index] = value
 	case ast.VariableExpr:
 		i.env.assign(expr.Variable.(ast.VariableExpr).Name, value)
 	}

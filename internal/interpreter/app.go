@@ -98,7 +98,7 @@ func run(source string) {
 		resolver.ResolveStmt(stmt)
 	}
 
-	//defer errorRecovery()
+	defer errorRecovery()
 	for _, stmt := range statements {
 		inter.Execute(stmt)
 	}
