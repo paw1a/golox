@@ -63,7 +63,7 @@ func (r *Resolver) variableExpr(expr ast.VariableExpr) {
 
 func (r *Resolver) assignExpr(expr ast.AssignExpr) {
 	r.ResolveExpr(expr.Initializer)
-	r.resolveLocal(expr, expr.Name)
+	//r.resolveLocal(expr, expr.Name)
 }
 
 func (r *Resolver) ternaryExpr(expr ast.TernaryExpr) {

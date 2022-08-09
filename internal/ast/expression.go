@@ -30,7 +30,7 @@ type VariableExpr struct {
 }
 
 type AssignExpr struct {
-	Name        lexing.Token
+	Variable    Expr
 	Initializer Expr
 }
 

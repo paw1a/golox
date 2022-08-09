@@ -56,7 +56,7 @@ func (expr AssignExpr) Print() string {
 
 	buffer.WriteString(" (")
 	buffer.WriteString("= ")
-	buffer.WriteString(expr.Name.Lexeme)
+	buffer.WriteString(expr.Variable.Print())
 	buffer.WriteString(expr.Initializer.Print())
 	buffer.WriteString(") ")
 

@@ -19,7 +19,8 @@ continueStatement: "continue" ";"
 expression: comma | lambda
 lambda: "fun" "(" parameters? ")" blockStatement
 comma: comma "," assignment | assignment
-assignment: IDENTIFIER "=" assignment | logicalOr
+assignment: IDENTIFIER "=" assignment | ternary | logicalOr
+ternary: expression "?" expression ":" expression
 logicalOr: logicalAnd ("or" logicalAnd)*
 logicalAnd: equality ("and" equality)*
 equality: comparison (("!=" | "==" ) comparison)*

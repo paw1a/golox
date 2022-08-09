@@ -166,11 +166,13 @@ func (i *Interpreter) evaluateVariableExpr(expr ast.VariableExpr) interface{} {
 
 func (i *Interpreter) evaluateAssignExpr(expr ast.AssignExpr) interface{} {
 	value := i.Evaluate(expr.Initializer)
-	distance, ok := i.locals[expr]
-	if ok {
-		i.env.assignAt(distance, expr.Name, value)
-	} else {
-		i.global.assign(expr.Name, value)
+	switch expr.Variable.(type) {
+	case ast.IndexExpr:
+		array := i.Evaluate(expr.Variable.(ast.IndexExpr).Array)
+		index := i.Evaluate(expr.Variable.(ast.IndexExpr).IndexExpr)
+		array.([]interface{})[int(index.(float64))] = value
+	case ast.VariableExpr:
+		i.env.assign(expr.Variable.(ast.VariableExpr).Name, value)
 	}
 	return value
 }

@@ -350,7 +350,12 @@ func (p *Parser) assignment() ast.Expr {
 		switch expr.(type) {
 		case ast.VariableExpr:
 			return ast.AssignExpr{
-				Name:        expr.(ast.VariableExpr).Name,
+				Variable:    expr.(ast.VariableExpr),
+				Initializer: value,
+			}
+		case ast.IndexExpr:
+			return ast.AssignExpr{
+				Variable:    expr.(ast.IndexExpr),
 				Initializer: value,
 			}
 		}
