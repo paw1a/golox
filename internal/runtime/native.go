@@ -8,24 +8,7 @@ import (
 	"time"
 )
 
-const MaxParamsCount = 255
-
 type ClockFunc struct {
-}
-
-type ExitFunc struct {
-}
-
-type AppendFunc struct {
-}
-
-type LenFunc struct {
-}
-
-type PrintFunc struct {
-}
-
-type SleepFunc struct {
 }
 
 func (f ClockFunc) Call(interpreter *Interpreter, arguments []interface{}) interface{} {
@@ -34,6 +17,9 @@ func (f ClockFunc) Call(interpreter *Interpreter, arguments []interface{}) inter
 
 func (f ClockFunc) ParametersCount() int {
 	return 0
+}
+
+type ExitFunc struct {
 }
 
 func (f ExitFunc) Call(interpreter *Interpreter, arguments []interface{}) interface{} {
@@ -53,6 +39,9 @@ func (f ExitFunc) ParametersCount() int {
 	return 1
 }
 
+type AppendFunc struct {
+}
+
 func (f AppendFunc) Call(interpreter *Interpreter, arguments []interface{}) interface{} {
 	arg0 := arguments[0]
 	switch arg0.(type) {
@@ -66,6 +55,9 @@ func (f AppendFunc) Call(interpreter *Interpreter, arguments []interface{}) inte
 
 func (f AppendFunc) ParametersCount() int {
 	return 2
+}
+
+type LenFunc struct {
 }
 
 func (f LenFunc) Call(interpreter *Interpreter, arguments []interface{}) interface{} {
@@ -83,10 +75,13 @@ func (f LenFunc) ParametersCount() int {
 	return 1
 }
 
+type PrintFunc struct {
+}
+
 func (f PrintFunc) Call(interpreter *Interpreter, arguments []interface{}) interface{} {
 	switch arguments[0].(type) {
 	case string:
-		arguments[0] = strings.Replace(arguments[0].(string), `\n`, "\n", -1)
+		arguments[0] = strings.ReplaceAll(arguments[0].(string), `\n`, "\n")
 		fmt.Printf(arguments[0].(string), arguments[1:]...)
 		return nil
 	}
@@ -97,6 +92,9 @@ func (f PrintFunc) Call(interpreter *Interpreter, arguments []interface{}) inter
 
 func (f PrintFunc) ParametersCount() int {
 	return -1
+}
+
+type SleepFunc struct {
 }
 
 func (f SleepFunc) Call(interpreter *Interpreter, arguments []interface{}) interface{} {
@@ -112,4 +110,16 @@ func (f SleepFunc) Call(interpreter *Interpreter, arguments []interface{}) inter
 
 func (f SleepFunc) ParametersCount() int {
 	return 1
+}
+
+type ClearFunc struct {
+}
+
+func (f ClearFunc) Call(interpreter *Interpreter, arguments []interface{}) interface{} {
+	fmt.Print("\033[2J")
+	return nil
+}
+
+func (f ClearFunc) ParametersCount() int {
+	return 0
 }
