@@ -87,6 +87,7 @@ func NewInterpreter() *Interpreter {
 	global.define("append", AppendFunc{})
 	global.define("len", LenFunc{})
 	global.define("printf", PrintFunc{})
+	global.define("sleep", SleepFunc{})
 	return &Interpreter{
 		env:    global,
 		global: global,

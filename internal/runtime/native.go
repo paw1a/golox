@@ -25,6 +25,9 @@ type LenFunc struct {
 type PrintFunc struct {
 }
 
+type SleepFunc struct {
+}
+
 func (f ClockFunc) Call(interpreter *Interpreter, arguments []interface{}) interface{} {
 	return float64(time.Now().UnixMilli())
 }
@@ -94,4 +97,19 @@ func (f PrintFunc) Call(interpreter *Interpreter, arguments []interface{}) inter
 
 func (f PrintFunc) ParametersCount() int {
 	return -1
+}
+
+func (f SleepFunc) Call(interpreter *Interpreter, arguments []interface{}) interface{} {
+	arg0 := arguments[0]
+	if isNumber(arg0) {
+		time.Sleep(time.Duration(arg0.(float64)) * time.Millisecond)
+		return nil
+	}
+
+	runtimeError(lexing.Token{}, "sleep expect number argument")
+	return nil
+}
+
+func (f SleepFunc) ParametersCount() int {
+	return 1
 }
