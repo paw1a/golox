@@ -1,8 +1,10 @@
 package runtime
 
 import (
+	"fmt"
 	"github.com/paw1a/golox/internal/lexing"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -18,6 +20,9 @@ type AppendFunc struct {
 }
 
 type LenFunc struct {
+}
+
+type PrintFunc struct {
 }
 
 func (f ClockFunc) Call(interpreter *Interpreter, arguments []interface{}) interface{} {
@@ -73,4 +78,20 @@ func (f LenFunc) Call(interpreter *Interpreter, arguments []interface{}) interfa
 
 func (f LenFunc) ParametersCount() int {
 	return 1
+}
+
+func (f PrintFunc) Call(interpreter *Interpreter, arguments []interface{}) interface{} {
+	switch arguments[0].(type) {
+	case string:
+		arguments[0] = strings.Replace(arguments[0].(string), `\n`, "\n", -1)
+		fmt.Printf(arguments[0].(string), arguments[1:]...)
+		return nil
+	}
+
+	runtimeError(lexing.Token{}, "printf expect format string at first argument")
+	return nil
+}
+
+func (f PrintFunc) ParametersCount() int {
+	return -1
 }

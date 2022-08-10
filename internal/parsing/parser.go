@@ -103,9 +103,6 @@ func (p *Parser) funDeclaration() ast.Stmt {
 
 func (p *Parser) statement() ast.Stmt {
 	switch {
-	case p.match(lexing.Print):
-		p.advance()
-		return p.printStatement()
 	case p.match(lexing.LeftBrace):
 		p.advance()
 		return p.blockStatement()
@@ -263,12 +260,6 @@ func (p *Parser) blockStatement() ast.Stmt {
 	p.requireToken(lexing.RightBrace, "'}' end of block expected")
 
 	return ast.BlockStmt{Stmts: stmts}
-}
-
-func (p *Parser) printStatement() ast.Stmt {
-	expr := p.expression()
-	p.requireToken(lexing.Semicolon, "';' expected")
-	return ast.PrintStmt{Expr: expr}
 }
 
 func (p *Parser) expressionStatement() ast.Stmt {
@@ -634,7 +625,7 @@ func (p *Parser) parseRecoverFunc() {
 func (p *Parser) synchronize() {
 	for !p.isEof() {
 		if p.match(lexing.Semicolon, lexing.Class, lexing.Fun,
-			lexing.For, lexing.If, lexing.While, lexing.Print,
+			lexing.For, lexing.If, lexing.While,
 			lexing.Return, lexing.Var) {
 			p.advance()
 			return

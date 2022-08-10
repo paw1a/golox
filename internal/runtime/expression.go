@@ -223,7 +223,7 @@ func (i *Interpreter) evaluateCallExpr(expr ast.CallExpr) interface{} {
 	switch calleeValue.(type) {
 	case Caller:
 		function := calleeValue.(Caller)
-		if function.ParametersCount() != len(argumentValues) {
+		if function.ParametersCount() >= 0 && function.ParametersCount() != len(argumentValues) {
 			runtimeError(expr.Paren,
 				fmt.Sprintf("expect %d arguments, got %d",
 					function.ParametersCount(), len(argumentValues)))

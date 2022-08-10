@@ -9,8 +9,6 @@ func (r *Resolver) ResolveStmt(stmt ast.Stmt) {
 	switch stmt.(type) {
 	case ast.ExpressionStmt:
 		r.exprStmt(stmt.(ast.ExpressionStmt))
-	case ast.PrintStmt:
-		r.printStmt(stmt.(ast.PrintStmt))
 	case ast.VarDeclarationStmt:
 		r.varDeclarationStmt(stmt.(ast.VarDeclarationStmt))
 	case ast.BlockStmt:
@@ -33,10 +31,6 @@ func (r *Resolver) ResolveStmt(stmt ast.Stmt) {
 }
 
 func (r *Resolver) exprStmt(stmt ast.ExpressionStmt) {
-	r.ResolveExpr(stmt.Expr)
-}
-
-func (r *Resolver) printStmt(stmt ast.PrintStmt) {
 	r.ResolveExpr(stmt.Expr)
 }
 

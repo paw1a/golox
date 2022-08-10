@@ -116,17 +116,6 @@ func (stmt ExpressionStmt) Print() string {
 	return buffer.String()
 }
 
-func (stmt PrintStmt) Print() string {
-	var buffer bytes.Buffer
-
-	buffer.WriteString(" (")
-	buffer.WriteString("print ")
-	buffer.WriteString(stmt.Expr.Print())
-	buffer.WriteString(") ")
-
-	return buffer.String()
-}
-
 func (stmt VarDeclarationStmt) Print() string {
 	var buffer bytes.Buffer
 

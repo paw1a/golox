@@ -12,10 +12,6 @@ type ExpressionStmt struct {
 	Expr Expr
 }
 
-type PrintStmt struct {
-	Expr Expr
-}
-
 type BlockStmt struct {
 	Stmts []Stmt
 }
