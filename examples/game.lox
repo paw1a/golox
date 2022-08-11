@@ -2,8 +2,6 @@ var WIDTH = 10;
 var HEIGHT = 20;
 
 var board = [];
-var screen = [];
-
 var figure;
 var x = 3;
 var y = 0;
@@ -26,7 +24,7 @@ fun init_board() {
     for (var i = 0; i < HEIGHT; i = i + 1) {
         var line = [];
         for (var j = 0; j < WIDTH; j = j + 1) {
-            line = append(line, "  ");
+            line = append(line, 0);
         }
         board = append(board, line);
     }
@@ -40,7 +38,28 @@ fun update() {
     }
 }
 
+fun min(a, b) {
+    if (a < b)
+        return a;
+    else
+        return b;
+}
+
 fun draw() {
+    var screen = init_screen();
+
+    for (var i = y; i < min(y + 5, HEIGHT); i = i + 1) {
+        for (var j = x; j < min(x + 5, WIDTH); j = j + 1) {
+            if (figure[i - y][j - x] > 0) {
+                screen[i][j] = "# ";
+            }
+        }
+    }
+
+    draw_screen(screen);
+}
+
+fun draw_screen(screen) {
     var s = "";
 
     for (var i = 0; i < WIDTH + 2; i = i + 1) {
@@ -48,18 +67,10 @@ fun draw() {
     }
     s = s + "\n";
 
-    for (var i = y; i < y + 5; i = i + 1) {
-        for (var j = x; j < x + 5; j = j + 1) {
-            if (figure[i - y][j - x] > 0) {
-                board[i][j] = "# ";
-            }
-        }
-    }
-
     for (var i = 0; i < HEIGHT; i = i + 1) {
         s = s + "# ";
         for (var j = 0; j < WIDTH; j = j + 1) {
-            s = s + board[i][j];
+            s = s + screen[i][j];
         }
         s = s + "#\n";
     }
@@ -70,6 +81,20 @@ fun draw() {
     s = s + "\n";
 
     printf(s);
+}
+
+fun init_screen() {
+    var screen = [];
+
+    for (var i = 0; i < HEIGHT; i = i + 1) {
+        var line = [];
+        for (var j = 0; j < WIDTH; j = j + 1) {
+            line = append(line, "  ");
+        }
+        screen = append(screen, line);
+    }
+
+    return screen;
 }
 
 var t = [
