@@ -2,6 +2,8 @@ var WIDTH = 10;
 var HEIGHT = 20;
 
 var board = [];
+var screen = [];
+
 var figure;
 var x = 3;
 var y = 0;
@@ -32,7 +34,7 @@ fun init_board() {
 
 fun update() {
     frames_counter = frames_counter + 1;
-    if (frames_counter > 60) {
+    if (frames_counter > 30) {
         y = y + 1;
         frames_counter = 0;
     }
@@ -48,8 +50,9 @@ fun draw() {
 
     for (var i = y; i < y + 5; i = i + 1) {
         for (var j = x; j < x + 5; j = j + 1) {
-            printf("%v\n", j);
-            board[i][j] = "# ";
+            if (figure[i - y][j - x] > 0) {
+                board[i][j] = "# ";
+            }
         }
     }
 
