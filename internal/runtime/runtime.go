@@ -74,6 +74,7 @@ func NewInterpreter() *Interpreter {
 	global.define("printf", PrintFunc{})
 	global.define("sleep", SleepFunc{})
 	global.define("clear", ClearFunc{})
+	global.define("randint", RandomIntFunc{})
 	return &Interpreter{
 		env:    global,
 		global: global,

@@ -32,17 +32,36 @@ fun init_board() {
 
 fun update() {
     frames_counter = frames_counter + 1;
-    if (frames_counter > 30) {
+    if (frames_counter > 5) {
         y = y + 1;
         frames_counter = 0;
-    }
-}
 
-fun min(a, b) {
-    if (a < b)
-        return a;
-    else
-        return b;
+        for (var i = y; i < y + 5; i = i + 1) {
+            for (var j = x; j < x + 5; j = j + 1) {
+                if (figure[i - y][j - x] > 0 and (i >= HEIGHT or board[i][j] > 0)) {
+                    y = y - 1;
+
+                    if (y == 0)
+                        exit(1);
+
+                    for (var i = y; i < min(y + 5, HEIGHT); i = i + 1) {
+                        for (var j = x; j < min(x + 5, WIDTH); j = j + 1) {
+                            if (figure[i - y][j - x] > 0 and board[i][j] == 0) {
+                                board[i][j] = figure[i - y][j - x];
+                            }
+                        }
+                    }
+
+                    x = 3;
+                    y = 0;
+
+                    figure = figures[randint(7)][0];
+                    return;
+                }
+            }
+        }
+
+    }
 }
 
 fun draw() {
@@ -51,8 +70,15 @@ fun draw() {
     for (var i = y; i < min(y + 5, HEIGHT); i = i + 1) {
         for (var j = x; j < min(x + 5, WIDTH); j = j + 1) {
             if (figure[i - y][j - x] > 0) {
-                screen[i][j] = "# ";
+                screen[i][j] = markers[figure[i - y][j - x]-1] + " ";
             }
+        }
+    }
+
+    for (var i = 0; i < HEIGHT; i = i + 1) {
+        for (var j = 0; j < WIDTH; j = j + 1) {
+            if (board[i][j] > 0)
+                screen[i][j] = markers[board[i][j]-1] + " ";
         }
     }
 
@@ -95,6 +121,13 @@ fun init_screen() {
     }
 
     return screen;
+}
+
+fun min(a, b) {
+    if (a < b)
+        return a;
+    else
+        return b;
 }
 
 var t = [
@@ -287,5 +320,6 @@ var i = [
 ];
 
 var figures = [t, j, z, o, s, l, i];
+var markers = ["@", "$", "*", "&", "M", "H", "+"];
 
 main();
