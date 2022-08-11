@@ -31,7 +31,6 @@ func (f ExitFunc) Call(interpreter *Interpreter, arguments []interface{}) interf
 	} else {
 		runtimeError(lexing.Token{}, "exit code must be integer number")
 	}
-
 	return nil
 }
 
