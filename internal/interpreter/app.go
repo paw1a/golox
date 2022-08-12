@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/paw1a/golox/internal/lexing"
 	"github.com/paw1a/golox/internal/parsing"
-	"github.com/paw1a/golox/internal/resolving"
 	"github.com/paw1a/golox/internal/runtime"
 	"io/ioutil"
 	"os"
@@ -91,12 +90,6 @@ func run(source string) {
 	}
 
 	inter := runtime.NewInterpreter()
-	resolver := resolving.NewResolver(inter)
-
-	defer errorRecovery()
-	for _, stmt := range statements {
-		resolver.ResolveStmt(stmt)
-	}
 
 	defer errorRecovery()
 	for _, stmt := range statements {

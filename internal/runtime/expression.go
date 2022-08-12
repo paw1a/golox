@@ -161,7 +161,7 @@ func (i *Interpreter) evaluateGroupingExpr(expr ast.GroupingExpr) interface{} {
 }
 
 func (i *Interpreter) evaluateVariableExpr(expr ast.VariableExpr) interface{} {
-	return i.lookUpVariable(expr.Name, expr)
+	return i.env.get(expr.Name)
 }
 
 func (i *Interpreter) evaluateAssignExpr(expr ast.AssignExpr) interface{} {

@@ -3,6 +3,7 @@ package runtime
 import (
 	"fmt"
 	"github.com/paw1a/golox/internal/lexing"
+	"math/rand"
 	"os"
 	"strings"
 	"time"
@@ -121,4 +122,21 @@ func (f ClearFunc) Call(interpreter *Interpreter, arguments []interface{}) inter
 
 func (f ClearFunc) ParametersCount() int {
 	return 0
+}
+
+type RandomIntFunc struct {
+}
+
+func (f RandomIntFunc) Call(interpreter *Interpreter, arguments []interface{}) interface{} {
+	arg0 := arguments[0]
+	if isNumber(arg0) {
+		return float64(rand.Intn(int(arg0.(float64))))
+	}
+
+	runtimeError(lexing.Token{}, "sleep expect number argument")
+	return nil
+}
+
+func (f RandomIntFunc) ParametersCount() int {
+	return 1
 }
